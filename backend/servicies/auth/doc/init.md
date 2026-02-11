@@ -10,9 +10,9 @@ go mod download
 #### 1.1 環境変数をセットする
 
 ```bash
-export JWT_SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 128 | head -n 1)
-export DATABASE_URL="postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
-export APP_ENV="dev"
+export AUTH_SERVICE_JWT_SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 128 | head -n 1)
+export AUTH_SERVICE_DATABASE_URL="postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+export AUTH_SERVICE_APP_ENV="develop"
 ```
 
 ### 2. DBをmigrateする
@@ -36,14 +36,14 @@ sudo mv migrate /usr/local/bin/
 #### 2.3 golang-migrateでmigrateする
 
 ```bash
-export DATABASE_URL="postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
-migrate -path sql/migrations/ -database "$DATABASE_URL" up
+export AUTH_SERVICE_DATABASE_URL="postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+migrate -path sql/migrations/ -database "$AUTH_SERVICE_DATABASE_URL" up
 ```
 
 #### 2.4 schemaファイルを生成する
 
 ```bash
-docker run --rm --network host postgres:18.1 pg_dump --schema-only --no-owner --no-privileges --no-comments "$DATABASE_URL" > sql/schema.sql
+docker run --rm --network host postgres:18.1 pg_dump --schema-only --no-owner --no-privileges --no-comments "$AUTH_SERVICE_DATABASE_URL" > sql/schema.sql
 ```
 
 ### 3. SQLからgoコード生成する

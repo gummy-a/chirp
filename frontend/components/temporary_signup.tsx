@@ -1,27 +1,39 @@
 "use client";
 
-import { SubmitEvent } from "react";
+import { SubmitEvent, useRef, useState } from "react";
+import { postApiAuthV1TmpSignup } from "@/lib/client/signup/sdk.gen";
 
-const onSubmit = async (
-  window: Window,
-  event: SubmitEvent<HTMLFormElement>,
-) => {
+const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
-  const response = await fetch("/auth/v1/tmp/signup/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(Object.fromEntries(formData)),
+
+  const ret = await postApiAuthV1TmpSignup({
+    body: {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    },
+    throwOnError: false,
   });
-  const data = await response.json();
-  if (response.ok) {
-    window.location.href = "/auth/signup/?token=" + data.signup_token;
-  }
+
+  return ret;
 };
 
 export const Signup = () => {
+  const ref = useRef<HTMLFormElement>(null);
+  const [msg, setMsg] = useState(<></>);
+
+  const submitProcess = async (e: SubmitEvent<HTMLFormElement>) => {
+    const ret = await onSubmit(e);
+
+    if(ret.response.ok) {
+      setMsg(<div className="text-green-500">Signup successful!</div>);
+      ref.current?.reset();
+    } else {
+      setMsg(<div className="text-red-500">Signup failed!</div>);
+    }
+  }
   return (
-    <form onSubmit={(e) => onSubmit(window, e)}>
+    <form ref={ref} onSubmit={(e) => submitProcess(e)}>
       <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
       <div className="mb-4">
         <label className="block mb-2" htmlFor="email">
@@ -46,6 +58,9 @@ export const Signup = () => {
           name="password"
           required
         />
+      </div>
+      <div className="mb-4">
+        {msg}
       </div>
       <button
         className="w-full bg-blue-500 text-white p-2 rounded"

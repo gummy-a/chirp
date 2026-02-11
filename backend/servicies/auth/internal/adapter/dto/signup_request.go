@@ -6,14 +6,14 @@ import (
 	usecase "github.com/gummy_a/chirp/auth/internal/usecase/register_account"
 )
 
-func ToSignupTemporaryAccountInput(req api.AuthV1TmpSignupPostRequest) *usecase.SignupTemporaryAccountInput {
+func ToSignupTemporaryAccountInput(req api.ApiAuthV1TmpSignupPostRequest) *usecase.SignupTemporaryAccountInput {
 	return &usecase.SignupTemporaryAccountInput{
 		Email:    req.Email,
 		Password: req.Password,
 	}
 }
 
-func ToSignupAccountInput(req api.AuthV1SignupPostRequest) (*usecase.SignupAccountInput, error) {
+func ToSignupAccountInput(req api.ApiAuthV1SignupPostRequest) (*usecase.SignupAccountInput, error) {
 	tmpAccountID, err := domain.NewTemporaryAccountIDFromSignupToken(req.SignupToken)
 	if err != nil {
 		return nil, err

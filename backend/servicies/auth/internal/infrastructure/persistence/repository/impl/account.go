@@ -14,7 +14,7 @@ import (
 
 type AccountRepository struct {
 	db     *pgxpool.Pool
-	sql *sqlc.Queries
+	sql    *sqlc.Queries
 	logger *slog.Logger
 }
 
@@ -50,9 +50,9 @@ func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(ctx context.
 
 	// delete temporary account
 	pgtypeUUID := pgtype.UUID{
-        Bytes: [16]byte(tmpAccount.Id),
-        Valid: true,
-    }
+		Bytes: [16]byte(tmpAccount.Id),
+		Valid: true,
+	}
 	_, err = qtx.DeleteTemporaryAccount(ctx, pgtypeUUID)
 	if err != nil {
 		r.logger.Error("Failed to delete temporary account", slog.String("email", email.String()), slog.String("error", err.Error()))
@@ -80,9 +80,9 @@ func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(ctx context.
 
 func (r *AccountRepository) Delete(ctx context.Context, id domain.AccountID) error {
 	pgtypeUUID := pgtype.UUID{
-        Bytes: [16]byte(id),
-        Valid: true,
-    }
+		Bytes: [16]byte(id),
+		Valid: true,
+	}
 
 	_, err := r.sql.DeleteAccount(ctx, pgtypeUUID)
 	if err != nil {

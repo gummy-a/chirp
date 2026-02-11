@@ -27,9 +27,9 @@ func GenerateJwt(accountID domain.AccountID) (*string, error) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	jwtSecretKey := os.Getenv("AUTH_SERVICE_JWT_SECRET_KEY")
 	if jwtSecretKey == "" {
-		return nil, errors.New("JWT_SECRET_KEY is not set")
+		return nil, errors.New("AUTH_SERVICE_JWT_SECRET_KEY is not set")
 	}
 
 	jwtResult, err := jwtToken.SignedString([]byte(jwtSecretKey))

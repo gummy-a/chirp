@@ -24,16 +24,15 @@ func NewRegistrationSenderRepository(logger *slog.Logger) *RegistrationSenderRep
 	return &RegistrationSenderRepository{logger: logger}
 }
 
-// ローカル確認用; gmailのapp passwordを事前に準備する必要あり
 func (r *RegistrationSenderRepository) sendGmail(to_address domain.Email, token domain.NumberCode) error {
-	from := os.Getenv("GMAIL_FROM_ADDRESS")
+	from := os.Getenv("AUTH_SERVICE_GMAIL_FROM_ADDRESS")
 	if from == "" {
-		return errors.New("GMAIL_FROM_ADDRESS is not set")
+		return errors.New("AUTH_SERVICE_GMAIL_FROM_ADDRESS is not set")
 	}
 
-	password := os.Getenv("GMAIL_APP_PASSWORD")
+	password := os.Getenv("AUTH_SERVICE_GMAIL_APP_PASSWORD")
 	if password == "" {
-		return errors.New("GMAIL_APP_PASSWORD is not set")
+		return errors.New("AUTH_SERVICE_GMAIL_APP_PASSWORD is not set")
 	}
 
 	body := "to register account, input following numbers " + fmt.Sprint(token) + "\n"
@@ -50,11 +49,12 @@ func (r *RegistrationSenderRepository) sendGmail(to_address domain.Email, token 
 }
 
 func (r *RegistrationSenderRepository) SendRegistrationEmail(to_address domain.Email, token domain.NumberCode) error {
-	env := os.Getenv("APP_ENV")
+	env := os.Getenv("AUTH_SERVICE_APP_ENV")
 	if env != "production" && env != "staging" {
 		fmt.Printf("Registration token for %s: %d\n", to_address.String(), token)
 		return nil
 	}
-	
+
+	// TODO: use a legitimate email service in production
 	return r.sendGmail(to_address, token)
 }

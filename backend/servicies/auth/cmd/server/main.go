@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
-	"log/slog"
 
 	"github.com/gummy_a/chirp/auth/internal/adapter/handler"
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db"
@@ -17,34 +17,34 @@ import (
 func main() {
 	ctx := context.Background()
 
-	// 構造化ロギングのセットアップ
+	// setup logger
 	opts := &slog.HandlerOptions{AddSource: true}
 	jsonhandler := slog.NewJSONHandler(os.Stdout, opts)
 	logger := slog.New(jsonhandler)
 
-	// Infrastructure層：DB接続を確立
+	// Infrastructure layer: create DB pool
 	pool, err := db.NewPool(ctx)
 	if err != nil {
 		log.Fatalf("Failed to create database pool: %v", err)
 	}
 	defer pool.Close()
 
-	// Infrastructure層：Queriesオブジェクトを作成
+	// Infrastructure layer: create SQLC queries
 	queries := sqlc.New(pool)
 
-	// Repository層：Repository実装を生成
+	// Repository layer: create repositories
 	accountRepo := repository.NewAccountRepository(pool, queries, logger)
 	temporaryAccountRepo := repository.NewTemporaryAccountRepository(queries, logger)
 	registrationSenderRepo := repository.NewRegistrationSenderRepository(logger)
 
-	// UseCase層：ユースケースを生成
+	// UseCase layer: create use cases
 	SignupAccountUseCase := usecase.NewSignupAccountUseCase(accountRepo, temporaryAccountRepo)
 	SignupTemporaryAccountUseCase := usecase.NewSignupTemporaryAccountUseCase(temporaryAccountRepo, registrationSenderRepo)
 
-	// Adapter層：UseCaseと接合
+	// Adapter layer: create HTTP handlers and router
 	router := handler.NewSignupRouter(SignupTemporaryAccountUseCase, SignupAccountUseCase, logger)
 
-	// APIサーバー待ち受け開始
+	//  Start HTTP server
 	port := os.Getenv("AUTH_SERVICE_PORT")
 	if port == "" {
 		port = "8080"

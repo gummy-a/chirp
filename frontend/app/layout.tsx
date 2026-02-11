@@ -1,3 +1,4 @@
+import Initializer from "@/components/initializer";
 import "./globals.css";
 
 export default function RootLayout({
@@ -7,7 +8,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="jp">
-      <body className="wrap-break-word px-4 max-w-2xl mx-auto">{children}</body>
+      <body className="wrap-break-word px-4 max-w-2xl mx-auto">
+        <Initializer />
+        {children}
+      </body>
     </html>
   );
 }
