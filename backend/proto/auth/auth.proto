@@ -1,0 +1,40 @@
+syntax = "proto3";
+package auth;
+
+option go_package = "/pb;pb";
+
+message AuthRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string account_id = 1;
+  string error = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterResponse {
+  string account_id = 1;
+  string error = 2;
+}
+
+message TemporaryRegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message TemporaryRegisterResponse {
+  string account_id = 1;
+  string error = 2;
+}
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc TemporaryRegister(TemporaryRegisterRequest) returns (TemporaryRegisterResponse);
+  rpc Authenticate(AuthRequest) returns (AuthResponse);
+}

@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: アカウント登録API
+  version: 0.1.0
+  description: メールアドレスとパスワードによるアカウント登録機能
+
+paths:
+
+# ========================================================================
+# アカウント仮登録
+# ========================================================================
+  /auth/v1/tmp/signup/:
+    post:
+      summary: アカウント仮登録
+      description: 新しいアカウントを仮登録します。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: "securePassword123"
+      responses:
+        '200':
+          description: 正常に作成されました。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signup_token:
+                    type: string
+                    description: 仮登録ユーザーID(uuid)
+
+        '400':
+          description: リクエスト形式の不備
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          description: 認証失敗（メールアドレスまたはパスワードが不正）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '403':
+          description: アカウントが既に存在する
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ========================================================================
+# アカウント本登録
+# ========================================================================
+  /auth/v1/signup/:
+    post:
+      summary: アカウント本登録
+      description: 新しいアカウントを本登録します。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - signup_token
+                - number_code
+              properties:
+                signup_token:
+                  type: string
+                  description: 仮登録ユーザーID(uuid)
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                number_code:
+                  type: integer
+                  description: 仮登録時にメールに記載されてる番号コード
+                  example: "123456"
+
+      responses:
+        '204':
+          description: アカウント本登録成功
+          headers:
+            Set-Cookie:
+              description: セッションIDを設定します。セキュリティのため HttpOnly と Secure 属性を推奨。
+              schema:
+                type: string
+                example: "session=5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict"
+
+        '400':
+          description: リクエスト形式の不備
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '403':
+          description: アカウント仮登録が完了していない、もしくは仮登録から一定時間が経過している
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラーコード
+          example: "UNAUTHORIZED"
+        message:
+          type: string
+          description: エラーの詳細内容
+          example: "メールアドレスまたはパスワードが正しくありません。"

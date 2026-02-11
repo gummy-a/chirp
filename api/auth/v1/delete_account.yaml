@@ -1,0 +1,60 @@
+openapi: 3.0.3
+info:
+  title: アカウント削除API
+  version: 0.1.0
+  description: アカウント削除機能
+
+paths:
+
+# ========================================================================
+# アカウント削除
+# ========================================================================
+  /auth/v1/delete_account/:
+    post:
+      summary: アカウント削除
+      description: アカウントを削除します。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+                  example: "securePassword123"
+
+      responses:
+        '204':
+          description: アカウント削除成功
+
+        '400':
+          description: リクエスト形式の不備
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラーコード
+          example: "UNAUTHORIZED"
+        message:
+          type: string
+          description: エラーの詳細内容
+          example: "メールアドレスまたはパスワードが正しくありません。"
