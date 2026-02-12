@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "name": "Auth Service",
+      "path": "backend/servicies/auth"
+    },
+    {
+      "name": "Frontend",
+      "path": "frontend"
+    },
+    {
+      "name": "Root (Optional)",
+      "path": "."
+    }
+  ],
+  "settings": {}
+}
