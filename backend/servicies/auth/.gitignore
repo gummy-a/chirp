@@ -2,3 +2,4 @@ internal/infrastructure/persistence/db/sqlc/
 internal/adapter/handler/grpc/pb/
 internal/adapter/openapi/
 sql/schema.sql
+.env

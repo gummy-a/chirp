@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"log/slog"
-	"math/rand"
+	"math/rand/v2"
 	"time"
 
 	"github.com/gummy_a/chirp/auth/internal/domain"
@@ -28,7 +28,7 @@ func (r *TemporaryAccountRepository) Create(ctx context.Context, email domain.Em
 		InfinityModifier: pgtype.Finite,
 	}
 
-	numberCode := rand.Int31n(999999)
+	numberCode := rand.IntN(900000) + 100000
 	token := domain.NumberCode(numberCode)
 
 	tmpAccount, err := r.sql.CreateTemporaryAccount(ctx, sqlc.CreateTemporaryAccountParams{

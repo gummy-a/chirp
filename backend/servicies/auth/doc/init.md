@@ -9,11 +9,7 @@ go mod download
 
 #### 1.1 環境変数をセットする
 
-```bash
-export AUTH_SERVICE_JWT_SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 128 | head -n 1)
-export AUTH_SERVICE_DATABASE_URL="postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
-export AUTH_SERVICE_APP_ENV="develop"
-```
+.env.sampleを参考に環境変数をセットする
 
 ### 2. DBをmigrateする
 

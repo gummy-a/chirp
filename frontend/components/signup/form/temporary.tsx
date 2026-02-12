@@ -2,6 +2,7 @@
 
 import { SubmitEvent, useRef, useState } from "react";
 import { postApiAuthV1TmpSignup } from "@/lib/client/signup/sdk.gen";
+import { useRouter } from "next/navigation";
 
 const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
@@ -18,20 +19,22 @@ const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   return ret;
 };
 
-export const Signup = () => {
+export const TemporarySignup = () => {
   const ref = useRef<HTMLFormElement>(null);
   const [msg, setMsg] = useState(<></>);
+  const router = useRouter();
 
   const submitProcess = async (e: SubmitEvent<HTMLFormElement>) => {
     const ret = await onSubmit(e);
 
-    if(ret.response.ok) {
-      setMsg(<div className="text-green-500">Signup successful!</div>);
+    if (ret.response.ok) {
+      router.push(`/signup/?token=${ret.data?.signup_token}`);
       ref.current?.reset();
     } else {
       setMsg(<div className="text-red-500">Signup failed!</div>);
     }
-  }
+  };
+
   return (
     <form ref={ref} onSubmit={(e) => submitProcess(e)}>
       <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
@@ -59,9 +62,7 @@ export const Signup = () => {
           required
         />
       </div>
-      <div className="mb-4">
-        {msg}
-      </div>
+      <div className="mb-4">{msg}</div>
       <button
         className="w-full bg-blue-500 text-white p-2 rounded"
         type="submit"

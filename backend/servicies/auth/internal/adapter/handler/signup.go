@@ -4,13 +4,20 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	"os"
 
 	"github.com/gummy_a/chirp/auth/internal/adapter/dto"
 	"github.com/gummy_a/chirp/auth/internal/adapter/middleware"
 	api "github.com/gummy_a/chirp/auth/internal/adapter/openapi/signup/go"
+	"github.com/gummy_a/chirp/auth/internal/domain"
 	usecase "github.com/gummy_a/chirp/auth/internal/usecase/register_account"
 )
+
+func chain(h http.Handler, middlewares ...func(http.Handler) http.Handler) http.Handler {
+	for _, m := range middlewares {
+		h = m(h)
+	}
+	return h
+}
 
 func NewSignupRouter(tmpcase *usecase.SignupTemporaryAccountUseCase, defcase *usecase.SignupAccountUseCase, logger *slog.Logger) http.Handler {
 	server := &signupHandler{
@@ -20,12 +27,16 @@ func NewSignupRouter(tmpcase *usecase.SignupTemporaryAccountUseCase, defcase *us
 	}
 	DefaultAPIController := api.NewDefaultAPIController(server)
 	router := api.NewRouter(DefaultAPIController)
-	router.Use(middleware.MiddlewareStoreWriter)
+
 	/*
 		router.Use() is often executed after the router has found the path.
 		By wrapping the router itself, make sure CORS detection runs before the gorilla/mux router.
 	*/
-	return middleware.EnableCORS(router)
+	middlewares := []func(http.Handler) http.Handler{
+		middleware.MiddlewareStoreWriter,
+		middleware.EnableCORS,
+	}
+	return chain(router, middlewares...)
 }
 
 type signupHandler struct {
@@ -41,7 +52,7 @@ func (h *signupHandler) ApiAuthV1TmpSignupPost(ctx context.Context, req api.ApiA
 		return api.ImplResponse{Code: 400, Body: api.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "failed to register temporary account",
-		}}, nil // set return value 'error' nil to avoid returning plain text error message 
+		}}, nil // set return value 'error' nil to avoid returning plain text error message
 	}
 
 	return api.ImplResponse{Code: 200, Body: api.ApiAuthV1TmpSignupPost200Response{
@@ -68,18 +79,27 @@ func (h *signupHandler) ApiAuthV1SignupPost(ctx context.Context, req api.ApiAuth
 		}}, nil
 	}
 
-	if w, ok := ctx.Value(middleware.ResponseWriterKey).(http.ResponseWriter); ok {
-		http.SetCookie(w, &http.Cookie{
-			Name:     "token",
-			Value:    token.String(),
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   os.Getenv("AUTH_SERVICE_APP_ENV") == "production",
-			SameSite: http.SameSiteLaxMode,
-			MaxAge:   86400, // 24h
-		})
-	} else {
-		h.logger.Error("ResponseWriter not found in context")
+	return api.ImplResponse{Code: 200, Body: api.ApiAuthV1SignupPost200Response{
+		JwtToken: token.String(),
+	}}, nil
+}
+
+func (h *signupHandler) ApiAuthV1TmpAccountIdGet(ctx context.Context, id string) (api.ImplResponse, error) {
+	var domainId domain.TemporaryAccountID
+	err := domainId.ParseString(id)
+	if err != nil {
+		h.logger.Error("Failed to parse temporary account id", slog.String("error", err.Error()))
+		return api.ImplResponse{Code: 404, Body: nil}, nil
+	}
+
+	accountId, err := h.tmpSignupUseCase.FindById(ctx, &domainId)
+	if err != nil {
+		h.logger.Error("Failed to get temporary account id", slog.String("error", err.Error()))
+		return api.ImplResponse{Code: 404, Body: nil}, nil
+	}
+
+	if accountId == nil {
+		return api.ImplResponse{Code: 404, Body: nil}, nil
 	}
 
 	return api.ImplResponse{Code: 204, Body: nil}, nil

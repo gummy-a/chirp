@@ -26,6 +26,10 @@ func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(ctx context.
 	email := domain.Email(tmpAccount.Email)
 	passwordHash := domain.PasswordHash(tmpAccount.Password)
 	algorithm := domain.NewPasswordAlgorithm()
+	pgtypeUUID := pgtype.UUID{
+		Bytes: [16]byte(tmpAccount.Id),
+		Valid: true,
+	}
 
 	// --- start a transaction
 	transaction, err := r.db.Begin(ctx)
@@ -49,10 +53,6 @@ func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(ctx context.
 	}
 
 	// delete temporary account
-	pgtypeUUID := pgtype.UUID{
-		Bytes: [16]byte(tmpAccount.Id),
-		Valid: true,
-	}
 	_, err = qtx.DeleteTemporaryAccount(ctx, pgtypeUUID)
 	if err != nil {
 		r.logger.Error("Failed to delete temporary account", slog.String("email", email.String()), slog.String("error", err.Error()))

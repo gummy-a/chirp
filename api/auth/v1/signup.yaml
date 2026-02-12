@@ -65,6 +65,30 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 # ========================================================================
+# 仮アカウントを検索する
+# ========================================================================
+  /api/auth/v1/tmp/account/{id}:
+    get:
+      summary: 仮アカウントがあるか検索する
+      description: 仮登録されたアカウントが存在するかを確認します。
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 仮登録ユーザーID(uuid)
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+
+      responses:
+        '204':
+          description: 仮アカウントが存在します。
+
+        '404':
+          description: アカウントが存在しません。
+
+# ========================================================================
 # アカウント本登録
 # ========================================================================
   /api/auth/v1/signup/:
@@ -87,18 +111,23 @@ paths:
                   example: "123e4567-e89b-12d3-a456-426614174000"
                 number_code:
                   type: integer
+                  minimum: 100000
+                  maximum: 999999
                   description: 仮登録時にメールに記載されてる番号コード
                   example: "123456"
 
       responses:
-        '204':
+        '200':
           description: アカウント本登録成功
-          headers:
-            Set-Cookie:
-              description: セッションIDを設定します。セキュリティのため HttpOnly と Secure 属性を推奨。
+          content:
+            application/json:
               schema:
-                type: string
-                example: "session=5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict"
+                type: object
+                properties:
+                  jwt_token:
+                    type: string
+                    description: JWTトークン
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
         '400':
           description: リクエスト形式の不備

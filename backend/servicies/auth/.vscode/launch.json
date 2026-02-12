@@ -7,10 +7,9 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd/server/main.go",
-            "env": {},
             "args": [],
             "showLog": true,
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
         }
     ]
 }

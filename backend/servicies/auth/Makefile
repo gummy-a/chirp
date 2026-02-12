@@ -21,7 +21,8 @@ help:
 	@printf "  make all              Run migrate, schema, sqlc-generate, protoc-generate, openapi-generate, tidy\n"
 
 start-postgres:
-	docker run --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+	@docker run --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+	@sleep 5 # wait for postgres to start
 
 stop-postgres:
 	-@docker stop postgres
@@ -51,4 +52,4 @@ tidy:
 	@echo "Running go mod tidy in backend/servicies/auth..."
 	@go mod tidy
 
-all: migrate schema sqlc-generate protoc-generate openapi-generate tidy
+all: stop-postgres start-postgres migrate schema sqlc-generate protoc-generate openapi-generate tidy

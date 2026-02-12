@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gummy_a/chirp/auth/internal/domain"
+	"github.com/gummy_a/chirp/auth/internal/domain/entity"
 	"github.com/gummy_a/chirp/auth/internal/usecase/repository"
 )
 
@@ -54,4 +55,8 @@ func (u *SignupTemporaryAccountUseCase) Execute(ctx context.Context, input *Sign
 	}
 
 	return tmpAccountID, nil
+}
+
+func (u *SignupTemporaryAccountUseCase) FindById(ctx context.Context, id *domain.TemporaryAccountID) (*entity.TemporaryAccount, error) {
+	return u.repo.FindById(ctx, id)
 }

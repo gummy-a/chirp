@@ -25,6 +25,16 @@ func (id *TemporaryAccountID) String() string {
 	return uuid.UUID(*id).String()
 }
 
+func (id *TemporaryAccountID) ParseString(s string) error {
+	parsed, err := uuid.Parse(s)
+	if err != nil {
+		return err
+	}
+
+	*id = TemporaryAccountID(parsed)
+	return nil
+}
+
 func NewTemporaryAccountIDFromSignupToken(s string) (TemporaryAccountID, error) {
 	parsed, err := uuid.Parse(s)
 	if err != nil {

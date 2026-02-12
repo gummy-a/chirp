@@ -16,8 +16,6 @@ var authAPI = []string{
 
 func generateAuthServerAPI(openapi string) {
 	for _, api := range authAPI {
-		fmt.Printf("generate %s\n\n", api)
-
 		p := strings.Split(api, "/")
 		filename := strings.Split(p[len(p)-1], ".")[0]
 		outpath := "backend/servicies/auth/internal/adapter/openapi/"+filename
@@ -29,12 +27,10 @@ func generateAuthServerAPI(openapi string) {
 
 		cmd := exec.Command("java", "-jar", openapi, "generate", "-i", api, "-g", "go-server", "-o", outpath, "-c", "api/config.json")
 
-		out, err := cmd.Output()
+		_, err = cmd.Output()
 		if err != nil {
-			fmt.Printf("!\n")
 			log.Fatal(err)
 		}
-		fmt.Printf("%s\n", string(out))
 
 		err = os.Chdir(outpath)
 		if err != nil {
@@ -55,6 +51,8 @@ func generateAuthServerAPI(openapi string) {
 		if err != nil {
 			log.Println(err)
 		}
+
+		fmt.Printf("generated %s\n", api)
 	}
 }
 

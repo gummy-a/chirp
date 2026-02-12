@@ -8,5 +8,6 @@ import (
 )
 
 func NewPool(ctx context.Context) (*pgxpool.Pool, error) {
-	return pgxpool.New(ctx, os.Getenv("AUTH_SERVICE_DATABASE_URL"))
+	url := os.Getenv("AUTH_SERVICE_DATABASE_URL")
+	return pgxpool.New(ctx, url)
 }
