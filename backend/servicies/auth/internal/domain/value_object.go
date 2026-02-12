@@ -59,7 +59,8 @@ func (p *PasswordHash) String() string {
 }
 
 func NewPasswordAlgorithm() PasswordAlgorithm {
-	return "Blowfish (bcrypt.GenerateFromPassword)" // sha512等ではない
+	// sha256, sha512, argon2, scrypt, bcrypt, etc. could be supported in the future
+	return "Blowfish (bcrypt.GenerateFromPassword)"
 }
 
 func (p *PasswordAlgorithm) String() string {

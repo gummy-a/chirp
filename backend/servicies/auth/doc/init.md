@@ -73,7 +73,7 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 ```bash
 cd backend/proto/auth
-protoc --go_out=../../servicies/auth/internal/adapter/grpc/ --go-grpc_out=../../servicies/auth/internal/adapter/grpc/ auth.proto
+protoc --go_out=../../servicies/auth/internal/adapter/handler/grpc/ --go-grpc_out=../../servicies/auth/internal/adapter/handler/grpc/ auth.proto
 ```
 
 ### 5. OpenAPIからコードを生成する
