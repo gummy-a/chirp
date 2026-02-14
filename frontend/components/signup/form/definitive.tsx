@@ -31,8 +31,7 @@ export const Signup = () => {
   const submitProcess = async (e: SubmitEvent<HTMLFormElement>) => {
     const ret = await onSubmit(token, e);
 
-    if (ret.response.ok && ret.data?.jwt_token) {
-      localStorage.setItem("jwt_token", ret.data.jwt_token);
+    if (ret.response.ok) {
       router.push("/");
     } else {
       setMsg(<div className="text-red-500">Signup failed!</div>);

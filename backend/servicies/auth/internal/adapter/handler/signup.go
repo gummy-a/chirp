@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/gummy_a/chirp/auth/internal/adapter/dto"
 	"github.com/gummy_a/chirp/auth/internal/adapter/middleware"
@@ -79,9 +80,19 @@ func (h *signupHandler) ApiAuthV1SignupPost(ctx context.Context, req api.ApiAuth
 		}}, nil
 	}
 
-	return api.ImplResponse{Code: 200, Body: api.ApiAuthV1SignupPost200Response{
-		JwtToken: token.String(),
-	}}, nil
+	if rw, ok := ctx.Value(middleware.ResponseWriterKey).(http.ResponseWriter); ok {
+		cookie := &http.Cookie{
+			Name:     "session",
+			Value:    token.String(),
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   os.Getenv("AUTH_SERVICE_APP_ENV") == "production",
+			MaxAge:   60 * 60 * 24, // 1day
+		}
+		http.SetCookie(rw, cookie)
+	}
+
+	return api.ImplResponse{Code: 204, Body: nil}, nil
 }
 
 func (h *signupHandler) ApiAuthV1TmpAccountIdGet(ctx context.Context, id string) (api.ImplResponse, error) {

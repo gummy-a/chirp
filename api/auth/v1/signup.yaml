@@ -117,17 +117,13 @@ paths:
                   example: "123456"
 
       responses:
-        '200':
+        '204':
           description: アカウント本登録成功
-          content:
-            application/json:
+          headers:
+            Set-Cookie:
               schema:
-                type: object
-                properties:
-                  jwt_token:
-                    type: string
-                    description: JWTトークン
-                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                type: string
+              description: セッションクッキー（JWTトークンを含む）
 
         '400':
           description: リクエスト形式の不備
