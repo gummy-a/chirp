@@ -8,6 +8,17 @@ DELETE FROM accounts
 WHERE id = $1
 RETURNING *;
 
+-- name: FindAccountByEmail :one
+SELECT *
+FROM accounts
+WHERE email = $1;
+
+-- name: FindAccountById :one
+SELECT *
+FROM accounts
+WHERE id = $1;
+
+
 -- name: CreateTemporaryAccount :one
 INSERT INTO temporary_accounts (email, password_hash, expires_at, number_code)
 VALUES ($1, $2, $3, $4)
@@ -22,8 +33,3 @@ RETURNING *;
 SELECT *
 FROM temporary_accounts
 WHERE id = $1;
-
--- name: CreateAuditLog :one
-INSERT INTO auth_audit_logs (success, account_id, event_type, identifier, failure_reason, ip_address, user_agent)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING *;

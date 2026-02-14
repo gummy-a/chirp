@@ -12,6 +12,7 @@ type AccountID uuid.UUID
 type TemporaryAccountID uuid.UUID
 type Email string
 type PasswordHash string
+type PasswordPlainText string
 type PasswordAlgorithm string
 type Timestamp time.Time
 type JwtToken string
@@ -19,6 +20,16 @@ type NumberCode int32
 
 func (id *AccountID) String() string {
 	return uuid.UUID(*id).String()
+}
+
+func (id *AccountID) ParseString(s string) error {
+	parsed, err := uuid.Parse(s)
+	if err != nil {
+		return err
+	}
+
+	*id = AccountID(parsed)
+	return nil
 }
 
 func (id *TemporaryAccountID) String() string {

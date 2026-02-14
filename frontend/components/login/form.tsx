@@ -1,26 +1,26 @@
 "use client";
 
-import { SubmitEvent, useRef, useState } from "react";
-import { postApiAuthV1TmpSignup } from "@/lib/client/auth/v1/sdk.gen";
+import { SubmitEvent, useState } from "react";
+import { postApiAuthV1Login } from "@/lib/client/auth/v1/sdk.gen";
 import { useRouter } from "next/navigation";
 
 const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
 
-  const ret = await postApiAuthV1TmpSignup({
+  const ret = await postApiAuthV1Login({
     body: {
       email: formData.get("email") as string,
       password: formData.get("password") as string,
     },
     throwOnError: false,
+    credentials: "include",
   });
 
   return ret;
 };
 
-export const TemporarySignup = () => {
-  const ref = useRef<HTMLFormElement>(null);
+export const LoginForm = () => {
   const [msg, setMsg] = useState(<></>);
   const router = useRouter();
 
@@ -28,16 +28,15 @@ export const TemporarySignup = () => {
     const ret = await onSubmit(e);
 
     if (ret.response.ok) {
-      router.push(`/signup/?token=${ret.data?.signup_token}`);
-      ref.current?.reset();
+      router.push('/');
     } else {
-      setMsg(<div className="text-red-500">Signup failed!</div>);
+      setMsg(<div className="text-red-500">Login failed!</div>);
     }
   };
 
   return (
-    <form ref={ref} onSubmit={(e) => submitProcess(e)}>
-      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
+    <form onSubmit={(e) => submitProcess(e)}>
+      <h1 className="text-2xl font-bold mb-4">Login</h1>
       <div className="mb-4">
         <label className="block mb-2" htmlFor="email">
           Email
@@ -67,7 +66,7 @@ export const TemporarySignup = () => {
         className="w-full bg-blue-500 text-white p-2 rounded"
         type="submit"
       >
-        Sign Up
+        Login
       </button>
     </form>
   );

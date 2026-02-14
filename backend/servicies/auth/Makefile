@@ -42,7 +42,7 @@ sqlc-generate:
 
 protoc-generate:
 	@echo "Generating protobuf (gRPC) code..."
-	@cd ../../proto/auth && $(PROTOC) --go_out=../../servicies/auth/internal/adapter/handler/grpc/ --go-grpc_out=../../servicies/auth/internal/adapter/handler/grpc/ auth.proto
+	@cd ../../proto/auth && $(PROTOC) --go_out=../../servicies/auth/internal/infrastructure/grpc/ --go-grpc_out=../../servicies/auth/internal/infrastructure/grpc/ auth.proto
 
 openapi-generate:
 	@echo "Generating OpenAPI code (run from repo root)..."

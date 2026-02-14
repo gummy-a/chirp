@@ -3,7 +3,7 @@
 import { TemporarySignup } from "./form/temporary";
 import { Signup } from "./form/definitive";
 import { useEffect, useState } from "react";
-import { getApiAuthV1TmpAccountById } from "@/lib/client/signup/sdk.gen";
+import { getApiAuthV1TmpAccountById } from "@/lib/client/auth/v1/sdk.gen";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export const ShowSignupForm = () => {

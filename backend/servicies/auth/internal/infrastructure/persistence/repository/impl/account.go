@@ -10,6 +10,7 @@ import (
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AccountRepository struct {
@@ -68,14 +69,14 @@ func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(ctx context.
 
 	// generate JWT token for the new account
 	account_id := domain.AccountID(createdAccount.ID.Bytes)
-	jwtToken, err := jwt.GenerateJwt(account_id)
+	jwt, err := jwt.GenerateJwt(&account_id)
 	if err != nil {
 		r.logger.Error("Failed to generate JWT", slog.String("account_id", account_id.String()), slog.String("error", err.Error()))
 		return nil, err
 	}
 
-	jwtTokenStr := domain.JwtToken(*jwtToken)
-	return &jwtTokenStr, nil
+	jwtToken := domain.JwtToken(*jwt)
+	return &jwtToken, nil
 }
 
 func (r *AccountRepository) Delete(ctx context.Context, id domain.AccountID) error {
@@ -90,4 +91,54 @@ func (r *AccountRepository) Delete(ctx context.Context, id domain.AccountID) err
 		return err
 	}
 	return nil
+}
+
+func (r *AccountRepository) FindByEmailAndPassword(ctx context.Context, email domain.Email, password domain.PasswordPlainText) (*domain.JwtToken, error) {
+	account, err := r.sql.FindAccountByEmail(ctx, email.String())
+	if err != nil {
+		r.logger.Error("Failed to find account by email and password", slog.String("email", account.Email), slog.String("password hash", account.PasswordHash), slog.String("error", err.Error()))
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(account.PasswordHash), []byte(password))
+	if err != nil {
+		r.logger.Error("Failed to compare password hash and password", slog.String("email", account.Email), slog.String("passwordHash", account.PasswordHash), slog.String("error", err.Error()))
+		return nil, err
+	}
+
+	account_id := domain.AccountID(account.ID.Bytes)
+	jwt, err := jwt.GenerateJwt(&account_id)
+	if err != nil {
+		r.logger.Error("Failed to generate JWT", slog.String("account_id", account_id.String()), slog.String("error", err.Error()))
+		return nil, err
+	}
+
+	jwtToken := domain.JwtToken(*jwt)
+	return &jwtToken, nil
+
+}
+
+func (r *AccountRepository) FindFromJwtToken(ctx context.Context, jwtToken *domain.JwtToken) (*entity.Account, error) {
+	accountId, err := jwt.ExtractClaims(jwtToken)
+	if err != nil {
+		r.logger.Error("Failed to extract claims from JWT", slog.String("error", err.Error()))
+		return nil, err
+	}
+	
+	pgtypeUUID := pgtype.UUID{
+		Bytes: [16]byte(*accountId),
+		Valid: true,
+	}
+
+	account, err := r.sql.FindAccountById(ctx, pgtypeUUID)
+	if err != nil {
+		r.logger.Error("Failed to find account by id", slog.String("account_id", account.ID.String()), slog.String("error", err.Error()))
+		return nil, err
+	}
+
+	return &entity.Account{
+		Email:    domain.Email(account.Email),
+		Password: domain.PasswordHash(account.PasswordHash),
+		Id:       domain.AccountID(account.ID.Bytes),
+	}, nil
 }

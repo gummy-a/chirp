@@ -7,15 +7,15 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gummy_a/chirp/auth/internal/adapter/handler"
+	controller "github.com/gummy_a/chirp/auth/internal/adapter/controller"
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db"
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db/sqlc"
 	repository "github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/repository/impl"
-	usecase "github.com/gummy_a/chirp/auth/internal/usecase/register_account"
+	loginLogoutUseCase "github.com/gummy_a/chirp/auth/internal/usecase/login_logout"
+	signupUseCase "github.com/gummy_a/chirp/auth/internal/usecase/signup"
 )
 
 func setDefaultEnvironmentVariables() {
-	// os.Setenv("AUTH_SERVICE_APP_ENV", "development")
 	env := os.Getenv("AUTH_SERVICE_APP_ENV")
 	if env == "development" {
 		os.Setenv("AUTH_SERVICE_PORT", "8080")
@@ -60,8 +60,8 @@ func main() {
 
 	// setup logger
 	opts := &slog.HandlerOptions{AddSource: true}
-	jsonhandler := slog.NewJSONHandler(os.Stdout, opts)
-	logger := slog.New(jsonhandler)
+	jsoncontroller := slog.NewJSONHandler(os.Stdout, opts)
+	logger := slog.New(jsoncontroller)
 
 	// Infrastructure layer: create DB pool
 	pool, err := db.NewPool(ctx)
@@ -79,11 +79,13 @@ func main() {
 	registrationSenderRepo := repository.NewRegistrationSenderRepository(logger)
 
 	// UseCase layer: create use cases
-	SignupAccountUseCase := usecase.NewSignupAccountUseCase(accountRepo, temporaryAccountRepo)
-	SignupTemporaryAccountUseCase := usecase.NewSignupTemporaryAccountUseCase(temporaryAccountRepo, registrationSenderRepo)
+	SignupAccountUseCase := signupUseCase.NewSignupAccountUseCase(accountRepo, temporaryAccountRepo)
+	SignupTemporaryAccountUseCase := signupUseCase.NewSignupTemporaryAccountUseCase(temporaryAccountRepo, registrationSenderRepo)
+	loginUseCase := loginLogoutUseCase.NewLoginAccountUseCase(accountRepo)
+	logoutUseCase := loginLogoutUseCase.NewLogoutAccountUseCase(accountRepo)
 
-	// Adapter layer: create HTTP handlers and router
-	router := handler.NewSignupRouter(SignupTemporaryAccountUseCase, SignupAccountUseCase, logger)
+	// Adapter layer: create HTTP controllers and router
+	router := controller.NewAppRouter(SignupTemporaryAccountUseCase, SignupAccountUseCase, loginUseCase, logoutUseCase, logger)
 
 	//  Start HTTP server
 	port := os.Getenv("AUTH_SERVICE_PORT")

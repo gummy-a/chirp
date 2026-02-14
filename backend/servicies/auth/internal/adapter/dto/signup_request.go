@@ -1,15 +1,15 @@
 package dto
 
 import (
-	api "github.com/gummy_a/chirp/auth/internal/adapter/openapi/signup/go"
 	"github.com/gummy_a/chirp/auth/internal/domain"
-	usecase "github.com/gummy_a/chirp/auth/internal/usecase/register_account"
+	api "github.com/gummy_a/chirp/auth/internal/infrastructure/auth/openapi/auth/go"
+	usecase "github.com/gummy_a/chirp/auth/internal/usecase/signup"
 )
 
 func ToSignupTemporaryAccountInput(req api.ApiAuthV1TmpSignupPostRequest) *usecase.SignupTemporaryAccountInput {
 	return &usecase.SignupTemporaryAccountInput{
-		Email:    req.Email,
-		Password: req.Password,
+		Email:    domain.Email(req.Email),
+		Password: domain.PasswordHash(req.Password),
 	}
 }
 

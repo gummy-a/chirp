@@ -1,7 +1,7 @@
 "use client";
 
 import { SubmitEvent, useRef, useState } from "react";
-import { postApiAuthV1Signup } from "@/lib/client/signup/sdk.gen";
+import { postApiAuthV1Signup } from "@/lib/client/auth/v1/sdk.gen";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 

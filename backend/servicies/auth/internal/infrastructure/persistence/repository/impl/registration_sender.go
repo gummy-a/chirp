@@ -16,11 +16,11 @@ func NewRegistrationSenderRepository(logger *slog.Logger) *RegistrationSenderRep
 	return &RegistrationSenderRepository{logger: logger}
 }
 
-func (r *RegistrationSenderRepository) SendRegistrationEmail(to_address domain.Email, token domain.NumberCode) error {
+func (r *RegistrationSenderRepository) SendRegistrationEmail(to_address *domain.Email, numberCode *domain.NumberCode, tmpAccountId *domain.TemporaryAccountID) error {
 	// In non-production/staging environments, just log the token instead of sending an email
 	env := os.Getenv("AUTH_SERVICE_APP_ENV")
 	if env != "production" && env != "staging" {
-		fmt.Printf("Registration token for %s: %d\n", to_address.String(), token)
+		fmt.Printf("Registration token for %s: %d\n", to_address.String(), numberCode)
 		return nil
 	}
 

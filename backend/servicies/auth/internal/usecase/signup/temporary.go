@@ -11,8 +11,8 @@ import (
 )
 
 type SignupTemporaryAccountInput struct {
-	Email    string
-	Password string
+	Email    domain.Email
+	Password domain.PasswordHash
 }
 
 type SignupTemporaryAccountUseCase struct {
@@ -28,24 +28,19 @@ func NewSignupTemporaryAccountUseCase(r repository.TemporaryAccountRepository, r
 }
 
 func (u *SignupTemporaryAccountUseCase) Execute(ctx context.Context, input *SignupTemporaryAccountInput) (*domain.TemporaryAccountID, error) {
-	email, err := domain.NewEmail(input.Email)
-	if err != nil {
-		return nil, err
-	}
-
 	var hashedPassword domain.PasswordHash
-	err = hashedPassword.NewHashFromBytes([]byte(input.Password))
+	err := hashedPassword.NewHashFromBytes([]byte(input.Password))
 	if err != nil {
 		return nil, err
 	}
 
 	expiresAt := domain.Timestamp(time.Now().Add(24 * time.Hour))
-	token, tmpAccountID, err := u.repo.Create(ctx, email, hashedPassword, expiresAt)
+	numberCode, tmpAccountID, err := u.repo.Create(ctx, input.Email, hashedPassword, expiresAt)
 	if err != nil {
 		return nil, err
 	}
 
-	err = u.reg.SendRegistrationEmail(email, *token)
+	err = u.reg.SendRegistrationEmail(&input.Email, numberCode, tmpAccountID)
 	if err != nil {
 		inner_error := u.repo.Delete(ctx, tmpAccountID)
 		if inner_error != nil {

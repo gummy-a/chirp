@@ -18,19 +18,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: user@example.com
-                password:
-                  type: string
-                  format: password
-                  example: "securePassword123"
+              $ref: '#/components/schemas/ApiAuthV1TmpSignupPostRequest'
       responses:
         '200':
           description: 正常に作成されました。
@@ -123,7 +111,7 @@ paths:
             Set-Cookie:
               schema:
                 type: string
-              description: セッションクッキー（JWTトークンを含む）
+              description: sessionとして返す（JWTにaccount_idを含める）
 
         '400':
           description: リクエスト形式の不備
@@ -146,8 +134,140 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+# ========================================================================
+# ログイン
+# ========================================================================
+  /api/auth/v1/login/:
+    post:
+      summary: アカウントログイン
+      description: メールアドレスとパスワードでアカウントにログインします。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiAuthV1LoginPostRequest'
+
+      responses:
+        '204':
+          description: アカウント本登録成功
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: sessionとして返す（JWTにaccount_idを含める）
+
+        '401':
+          description: 認証失敗（メールアドレスまたはパスワードが不正）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ========================================================================
+# ログアウト
+# ========================================================================
+  /api/auth/v1/logout/:
+    post:
+      summary: アカウントログアウト
+      description: アカウントをログアウトします。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session
+              properties:
+                session:
+                  type: string
+                  description: ログイン時に発行されたsession(JWT)
+                  example: "abcdef123456"
+
+      responses:
+        '204':
+          description: アカウントログアウト成功
+
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ========================================================================
+# アカウント削除
+# ========================================================================
+  # /api/auth/v1/delete_account/:
+  #   post:
+  #     summary: アカウント削除
+  #     description: アカウントを削除します。
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             required:
+  #               - password
+  #             properties:
+  #               password:
+  #                 type: string
+  #                 format: password
+  #                 example: "securePassword123"
+
+  #     responses:
+  #       '204':
+  #         description: アカウント削除成功
+
+  #       '400':
+  #         description: リクエスト形式の不備
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ErrorResponse'
+
+  #       '401':
+  #         description: 認証失敗
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/ErrorResponse'
+
+# ------------------------------------------------------------------------
+# components
+# ------------------------------------------------------------------------
 components:
   schemas:
+    ApiAuthV1TmpSignupPostRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: "securePassword123"
+    ApiAuthV1LoginPostRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: "securePassword123"
     ErrorResponse:
       type: object
       properties:

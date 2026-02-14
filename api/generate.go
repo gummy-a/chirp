@@ -9,16 +9,15 @@ import (
 )
 
 var authAPI = []string{
-	"api/auth/v1/signup.yaml",
-	// "api/auth/v1/login_logout.yaml",
-	// "api/auth/v1/delete_account.yaml",
+	"api/auth/v1/auth.yaml",
 }
 
 func generateAuthServerAPI(openapi string) {
 	for _, api := range authAPI {
+		fmt.Printf("generate %s ...\n", api)
 		p := strings.Split(api, "/")
 		filename := strings.Split(p[len(p)-1], ".")[0]
-		outpath := "backend/servicies/auth/internal/adapter/openapi/"+filename
+		outpath := "backend/servicies/auth/internal/infrastructure/auth/openapi/"+filename
 
 		currentDir, err := os.Getwd()
 		if err != nil {

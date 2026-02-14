@@ -5,5 +5,5 @@ import (
 )
 
 type RegistrationSenderRepository interface {
-	SendRegistrationEmail(to_address domain.Email, token domain.NumberCode) error
+	SendRegistrationEmail(to_address *domain.Email, numberCode *domain.NumberCode, tmpAccountId *domain.TemporaryAccountID) error
 }
