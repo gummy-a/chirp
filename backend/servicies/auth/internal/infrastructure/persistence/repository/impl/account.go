@@ -124,7 +124,7 @@ func (r *AccountRepository) FindFromJwtToken(ctx context.Context, jwtToken *doma
 		r.logger.Error("Failed to extract claims from JWT", slog.String("error", err.Error()))
 		return nil, err
 	}
-	
+
 	pgtypeUUID := pgtype.UUID{
 		Bytes: [16]byte(*accountId),
 		Valid: true,

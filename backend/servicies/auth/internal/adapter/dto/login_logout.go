@@ -13,7 +13,7 @@ func ToLoginInput(req api.ApiAuthV1LoginPostRequest) *usecase.LoginAccountInput 
 	}
 }
 
-func ToLogoutInput(req api.ApiAuthV1LogoutPostRequest) (*usecase.LogoutAccountInput) {
+func ToLogoutInput(req api.ApiAuthV1LogoutPostRequest) *usecase.LogoutAccountInput {
 	return &usecase.LogoutAccountInput{
 		JwtToken: domain.JwtToken(req.Session),
 	}

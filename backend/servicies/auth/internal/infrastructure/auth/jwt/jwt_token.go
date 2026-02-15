@@ -35,13 +35,13 @@ func GenerateJwt(accountID *domain.AccountID) (*string, error) {
 
 func ExtractClaims(jwtToken *domain.JwtToken) (*domain.AccountID, error) {
 	jwtSecretKey := os.Getenv("AUTH_SERVICE_JWT_SECRET_KEY")
-    token, err := jwt.ParseWithClaims(jwtToken.String(), &Claims{}, func(token *jwt.Token) (interface{}, error) {
-        return []byte(jwtSecretKey), nil
-    })
+	token, err := jwt.ParseWithClaims(jwtToken.String(), &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecretKey), nil
+	})
 
-    if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return &claims.Id, nil
-    } else {
-        return nil, err
-    }
+	} else {
+		return nil, err
+	}
 }
