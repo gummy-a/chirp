@@ -1,5 +1,10 @@
 import { ShowSignupForm } from "@/components/signup/show_form";
+import { Suspense } from "react";
 
 export default function Home() {
-  return <ShowSignupForm />;
+  return (
+    <Suspense>
+      <ShowSignupForm />
+    </Suspense>
+  );
 }

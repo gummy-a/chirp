@@ -1,12 +1,12 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { postApiAuthV1Logout } from "@/lib/client/auth/v1/sdk.gen";
 
 export async function GET() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('session');
+  const token = cookieStore.get("session");
 
-  if(!token) {
+  if (!token) {
     return;
   }
 
@@ -18,9 +18,8 @@ export async function GET() {
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
   });
 
-  if(ret.response.ok) {
-    cookieStore.delete('session');
-    redirect('/');
+  if (ret.response.ok) {
+    cookieStore.delete("session");
+    redirect("/");
   }
-
 }

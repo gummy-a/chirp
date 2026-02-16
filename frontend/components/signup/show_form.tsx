@@ -18,7 +18,7 @@ export const ShowSignupForm = () => {
         if (localStorage.getItem("jwt_token")) {
           router.push("/");
         }
-        
+
         const ret = await getApiAuthV1TmpAccountById({
           path: {
             id: token,
@@ -31,11 +31,11 @@ export const ShowSignupForm = () => {
         } else {
           setElement(<TemporarySignup />);
         }
-      } catch (e) {
+      } catch {
         setElement(<TemporarySignup />);
       }
     })();
-  }, [token]);
+  }, [token, router]);
 
   return element;
 };

@@ -28,7 +28,7 @@ export const LoginForm = () => {
     const ret = await onSubmit(e);
 
     if (ret.response.ok) {
-      router.push('/');
+      router.push("/");
     } else {
       setMsg(<div className="text-red-500">Login failed!</div>);
     }
