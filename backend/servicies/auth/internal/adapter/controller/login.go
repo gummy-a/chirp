@@ -9,9 +9,22 @@ import (
 	"github.com/gummy_a/chirp/auth/internal/adapter/dto"
 	"github.com/gummy_a/chirp/auth/internal/adapter/middleware"
 	api "github.com/gummy_a/chirp/auth/internal/infrastructure/auth/openapi/auth/go"
+	loginLogoutUseCase "github.com/gummy_a/chirp/auth/internal/usecase/login_logout"
 )
 
-func (h *AppHandler) ApiAuthV1LoginPost(ctx context.Context, req api.ApiAuthV1LoginPostRequest) (api.ImplResponse, error) {
+type LoginHandler struct {
+	loginUseCase *loginLogoutUseCase.LoginAccountUseCase
+	logger       *slog.Logger
+}
+
+func NewLoginHandler(Login *loginLogoutUseCase.LoginAccountUseCase, logger *slog.Logger) *LoginHandler {
+	return &LoginHandler{
+		loginUseCase: Login,
+		logger:       logger,
+	}
+}
+
+func (h *LoginHandler) Login(ctx context.Context, req api.ApiAuthV1LoginPostRequest) (api.ImplResponse, error) {
 	input := dto.ToLoginInput(req)
 	jwtToken, err := h.loginUseCase.Execute(ctx, input)
 	if err != nil {
@@ -35,4 +48,8 @@ func (h *AppHandler) ApiAuthV1LoginPost(ctx context.Context, req api.ApiAuthV1Lo
 	}
 
 	return api.ImplResponse{Code: 204, Body: nil}, nil
+}
+
+func (h *AppHandler) ApiAuthV1LoginPost(ctx context.Context, req api.ApiAuthV1LoginPostRequest) (api.ImplResponse, error) {
+	return h.loginHandler.Login(ctx, req)
 }

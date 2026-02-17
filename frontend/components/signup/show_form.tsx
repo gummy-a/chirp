@@ -24,6 +24,7 @@ export const ShowSignupForm = () => {
             id: token,
           },
           throwOnError: false,
+          baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,  
         });
 
         if (ret.response.ok && token) {

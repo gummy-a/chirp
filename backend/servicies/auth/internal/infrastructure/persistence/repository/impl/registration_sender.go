@@ -20,7 +20,7 @@ func (r *RegistrationSenderRepository) SendRegistrationEmail(to_address *domain.
 	// In non-production/staging environments, just log the token instead of sending an email
 	env := os.Getenv("AUTH_SERVICE_APP_ENV")
 	if env != "production" && env != "staging" {
-		fmt.Printf("Registration token for %s: %d\n", to_address.String(), numberCode)
+		fmt.Printf("Registration token for %s: %d\n", to_address.String(), *numberCode)
 		return nil
 	}
 

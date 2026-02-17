@@ -8,7 +8,7 @@ import (
 func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		allowOrigin := os.Getenv("AUTH_SERVICE_ALLOW_ORIGIN")
-
+		
 		// DO NOT SET WILDCARD for any "Access-Control-Allow-"
 		w.Header().Set("Access-Control-Allow-Origin", allowOrigin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")

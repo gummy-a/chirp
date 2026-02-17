@@ -10,12 +10,27 @@ import (
 	"github.com/gummy_a/chirp/auth/internal/adapter/middleware"
 	"github.com/gummy_a/chirp/auth/internal/domain"
 	api "github.com/gummy_a/chirp/auth/internal/infrastructure/auth/openapi/auth/go"
+	signupUseCase "github.com/gummy_a/chirp/auth/internal/usecase/signup"
 )
 
-func (h *AppHandler) ApiAuthV1TmpSignupPost(ctx context.Context, req api.ApiAuthV1TmpSignupPostRequest) (api.ImplResponse, error) {
-	accountId, err := h.tmpSignupUseCase.Execute(ctx, dto.ToSignupTemporaryAccountInput(req))
+type SignupHandler struct {
+	signupUseCase    *signupUseCase.SignupAccountUseCase
+	tmpSignupUseCase *signupUseCase.SignupTemporaryAccountUseCase
+	logger           *slog.Logger
+}
+
+func NewSignupHandler(signup *signupUseCase.SignupAccountUseCase, tmpSignup *signupUseCase.SignupTemporaryAccountUseCase, logger *slog.Logger) *SignupHandler {
+	return &SignupHandler{
+		signupUseCase:    signup,
+		tmpSignupUseCase: tmpSignup,
+		logger:           logger,
+	}
+}
+
+func (s *SignupHandler) TmpSignup(ctx context.Context, req api.ApiAuthV1TmpSignupPostRequest) (api.ImplResponse, error) {
+	accountId, err := s.tmpSignupUseCase.Execute(ctx, dto.ToSignupTemporaryAccountInput(req))
 	if err != nil {
-		h.logger.Error("Failed to execute temporary account signup", slog.String("error", err.Error()))
+		s.logger.Error("Failed to execute temporary account signup", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 400, Body: api.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "failed to signup temporary account",
@@ -27,19 +42,19 @@ func (h *AppHandler) ApiAuthV1TmpSignupPost(ctx context.Context, req api.ApiAuth
 	}}, nil
 }
 
-func (h *AppHandler) ApiAuthV1SignupPost(ctx context.Context, req api.ApiAuthV1SignupPostRequest) (api.ImplResponse, error) {
+func (s *SignupHandler) Signup(ctx context.Context, req api.ApiAuthV1SignupPostRequest) (api.ImplResponse, error) {
 	ToSignupAccountInput, err := dto.ToSignupAccountInput(req)
 	if err != nil {
-		h.logger.Error("Failed to convert signup account input", slog.String("error", err.Error()))
+		s.logger.Error("Failed to convert signup account input", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 401, Body: api.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "invalid signup token",
 		}}, nil
 	}
 
-	token, err := h.signupUseCase.Execute(ctx, ToSignupAccountInput)
+	token, err := s.signupUseCase.Execute(ctx, ToSignupAccountInput)
 	if err != nil {
-		h.logger.Error("Failed to execute account signup", slog.String("error", err.Error()))
+		s.logger.Error("Failed to execute account signup", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 401, Body: api.ErrorResponse{
 			Error:   "Unauthorized",
 			Message: "failed to signup account",
@@ -61,17 +76,17 @@ func (h *AppHandler) ApiAuthV1SignupPost(ctx context.Context, req api.ApiAuthV1S
 	return api.ImplResponse{Code: 204, Body: nil}, nil
 }
 
-func (h *AppHandler) ApiAuthV1TmpAccountIdGet(ctx context.Context, id string) (api.ImplResponse, error) {
+func (s *SignupHandler) FindTemporaryAccountById(ctx context.Context, id string) (api.ImplResponse, error) {
 	var domainId domain.TemporaryAccountID
 	err := domainId.ParseString(id)
 	if err != nil {
-		h.logger.Error("Failed to parse temporary account id", slog.String("error", err.Error()))
+		s.logger.Error("Failed to parse temporary account id", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 404, Body: nil}, nil
 	}
 
-	accountId, err := h.tmpSignupUseCase.FindById(ctx, &domainId)
+	accountId, err := s.tmpSignupUseCase.FindById(ctx, &domainId)
 	if err != nil {
-		h.logger.Error("Failed to get temporary account id", slog.String("error", err.Error()))
+		s.logger.Error("Failed to get temporary account id", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 404, Body: nil}, nil
 	}
 
@@ -80,4 +95,16 @@ func (h *AppHandler) ApiAuthV1TmpAccountIdGet(ctx context.Context, id string) (a
 	}
 
 	return api.ImplResponse{Code: 204, Body: nil}, nil
+}
+
+func (h *AppHandler) ApiAuthV1TmpSignupPost(ctx context.Context, req api.ApiAuthV1TmpSignupPostRequest) (api.ImplResponse, error) {
+	return h.signupHandler.TmpSignup(ctx, req)
+}
+
+func (h *AppHandler) ApiAuthV1SignupPost(ctx context.Context, req api.ApiAuthV1SignupPostRequest) (api.ImplResponse, error) {
+	return h.signupHandler.Signup(ctx, req)
+}
+
+func (h *AppHandler) ApiAuthV1TmpAccountIdGet(ctx context.Context, id string) (api.ImplResponse, error) {
+	return h.signupHandler.FindTemporaryAccountById(ctx, id)
 }

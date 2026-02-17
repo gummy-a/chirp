@@ -79,13 +79,16 @@ func main() {
 	registrationSenderRepo := repository.NewRegistrationSenderRepository(logger)
 
 	// UseCase layer: create use cases
-	SignupAccountUseCase := signupUseCase.NewSignupAccountUseCase(accountRepo, temporaryAccountRepo)
-	SignupTemporaryAccountUseCase := signupUseCase.NewSignupTemporaryAccountUseCase(temporaryAccountRepo, registrationSenderRepo)
+	signupAccountUseCase := signupUseCase.NewSignupAccountUseCase(accountRepo, temporaryAccountRepo)
+	signupTemporaryAccountUseCase := signupUseCase.NewSignupTemporaryAccountUseCase(temporaryAccountRepo, registrationSenderRepo)
 	loginUseCase := loginLogoutUseCase.NewLoginAccountUseCase(accountRepo)
 	logoutUseCase := loginLogoutUseCase.NewLogoutAccountUseCase(accountRepo)
 
 	// Adapter layer: create HTTP controllers and router
-	router := controller.NewAppRouter(SignupTemporaryAccountUseCase, SignupAccountUseCase, loginUseCase, logoutUseCase, logger)
+	signupHandler := controller.NewSignupHandler(signupAccountUseCase, signupTemporaryAccountUseCase, logger)
+	logoutHandler := controller.NewLogoutHandler(logoutUseCase, logger)
+	loginHandler := controller.NewLoginHandler(loginUseCase, logger)
+	router := controller.NewAppRouter(loginHandler, logoutHandler, signupHandler, logger)
 
 	//  Start HTTP server
 	port := os.Getenv("AUTH_SERVICE_PORT")

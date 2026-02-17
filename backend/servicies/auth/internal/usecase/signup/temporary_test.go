@@ -67,7 +67,7 @@ func TestFindByIdTemporaryAccount_Success(t *testing.T) {
 	}
 
 	accountId, err := uc.Execute(context.Background(), input)
-	
+
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -97,7 +97,6 @@ func TestFindByIdTemporaryAccount_FailureBeforeSignup(t *testing.T) {
 
 	uc := usecase.NewSignupTemporaryAccountUseCase(repo, sender)
 
-	
 	var id domain.TemporaryAccountID
 	id.ParseString("6991c26a-8414-8324-9935-5b15cadb1c94")
 
