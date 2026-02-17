@@ -23,7 +23,7 @@ func setDefaultEnvironmentVariables() {
 		os.Setenv("AUTH_SERVICE_PORT", "8080")
 		os.Setenv("AUTH_SERVICE_JWT_SECRET_KEY", "PSsDWRYMnGnLZpq1uq4Dd24WnGncTBkbtciiXzFNqGPHyJ")
 		os.Setenv("AUTH_SERVICE_ALLOW_ORIGIN", "http://localhost:3000") // DO NOT SET WILDCARD
-		os.Setenv("AUTH_SERVICE_DATABASE_URL", "postgres://postgres:password@localhost:5432/postgres?sslmode=disable")
+		os.Setenv("AUTH_SERVICE_DATABASE_URL", "postgres://postgres:password@localhost:5432/auth_service?sslmode=disable")
 	} else {
 		err := godotenv.Load()
 		if err != nil {
