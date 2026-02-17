@@ -35,7 +35,3 @@ func (l *LogoutHandler) Logout(ctx context.Context, req api.ApiAuthV1LogoutPostR
 
 	return api.ImplResponse{Code: 204, Body: nil}, nil
 }
-
-func (h *AppHandler) ApiAuthV1LogoutPost(ctx context.Context, req api.ApiAuthV1LogoutPostRequest) (api.ImplResponse, error) {
-	return h.logoutHandler.Logout(ctx, req)
-}

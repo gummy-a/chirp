@@ -8,12 +8,13 @@ import (
 	"os"
 
 	controller "github.com/gummy_a/chirp/auth/internal/adapter/controller"
+	"github.com/gummy_a/chirp/auth/internal/adapter/controller/router"
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db"
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db/sqlc"
 	repository "github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/repository/impl"
 	loginLogoutUseCase "github.com/gummy_a/chirp/auth/internal/usecase/login_logout"
 	signupUseCase "github.com/gummy_a/chirp/auth/internal/usecase/signup"
-    "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
 
 func setDefaultEnvironmentVariables() {
@@ -24,10 +25,10 @@ func setDefaultEnvironmentVariables() {
 		os.Setenv("AUTH_SERVICE_ALLOW_ORIGIN", "http://localhost:3000") // DO NOT SET WILDCARD
 		os.Setenv("AUTH_SERVICE_DATABASE_URL", "postgres://postgres:password@localhost:5432/postgres?sslmode=disable")
 	} else {
-	  err := godotenv.Load()
-	  if err != nil {
-		log.Fatal("Error loading .env file")
-	  }
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 }
 
@@ -94,7 +95,7 @@ func main() {
 	signupHandler := controller.NewSignupHandler(signupAccountUseCase, signupTemporaryAccountUseCase, logger)
 	logoutHandler := controller.NewLogoutHandler(logoutUseCase, logger)
 	loginHandler := controller.NewLoginHandler(loginUseCase, logger)
-	router := controller.NewAppRouter(loginHandler, logoutHandler, signupHandler, logger)
+	router := router.NewAppRouter(loginHandler, logoutHandler, signupHandler, logger)
 
 	//  Start HTTP server
 	port := os.Getenv("AUTH_SERVICE_PORT")

@@ -96,15 +96,3 @@ func (s *SignupHandler) FindTemporaryAccountById(ctx context.Context, id string)
 
 	return api.ImplResponse{Code: 204, Body: nil}, nil
 }
-
-func (h *AppHandler) ApiAuthV1TmpSignupPost(ctx context.Context, req api.ApiAuthV1TmpSignupPostRequest) (api.ImplResponse, error) {
-	return h.signupHandler.TmpSignup(ctx, req)
-}
-
-func (h *AppHandler) ApiAuthV1SignupPost(ctx context.Context, req api.ApiAuthV1SignupPostRequest) (api.ImplResponse, error) {
-	return h.signupHandler.Signup(ctx, req)
-}
-
-func (h *AppHandler) ApiAuthV1TmpAccountIdGet(ctx context.Context, id string) (api.ImplResponse, error) {
-	return h.signupHandler.FindTemporaryAccountById(ctx, id)
-}

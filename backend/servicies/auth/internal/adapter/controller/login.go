@@ -49,7 +49,3 @@ func (h *LoginHandler) Login(ctx context.Context, req api.ApiAuthV1LoginPostRequ
 
 	return api.ImplResponse{Code: 204, Body: nil}, nil
 }
-
-func (h *AppHandler) ApiAuthV1LoginPost(ctx context.Context, req api.ApiAuthV1LoginPostRequest) (api.ImplResponse, error) {
-	return h.loginHandler.Login(ctx, req)
-}
