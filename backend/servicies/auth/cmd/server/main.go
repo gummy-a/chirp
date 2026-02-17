@@ -13,6 +13,7 @@ import (
 	repository "github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/repository/impl"
 	loginLogoutUseCase "github.com/gummy_a/chirp/auth/internal/usecase/login_logout"
 	signupUseCase "github.com/gummy_a/chirp/auth/internal/usecase/signup"
+    "github.com/joho/godotenv"
 )
 
 func setDefaultEnvironmentVariables() {
@@ -22,6 +23,11 @@ func setDefaultEnvironmentVariables() {
 		os.Setenv("AUTH_SERVICE_JWT_SECRET_KEY", "PSsDWRYMnGnLZpq1uq4Dd24WnGncTBkbtciiXzFNqGPHyJ")
 		os.Setenv("AUTH_SERVICE_ALLOW_ORIGIN", "http://localhost:3000") // DO NOT SET WILDCARD
 		os.Setenv("AUTH_SERVICE_DATABASE_URL", "postgres://postgres:password@localhost:5432/postgres?sslmode=disable")
+	} else {
+	  err := godotenv.Load()
+	  if err != nil {
+		log.Fatal("Error loading .env file")
+	  }
 	}
 }
 
