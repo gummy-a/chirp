@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "launch.json": "jsonc",
+        "settings.json": "jsonc"
+    }
+}
