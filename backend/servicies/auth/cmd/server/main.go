@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -27,7 +28,7 @@ func setDefaultEnvironmentVariables() {
 	} else {
 		err := godotenv.Load()
 		if err != nil {
-			log.Fatal("Error loading .env file")
+			fmt.Printf(".env not loaded.%v\n", err)
 		}
 	}
 }

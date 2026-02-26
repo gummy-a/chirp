@@ -6,7 +6,7 @@ MIGRATE := migrate
 SQLC := sqlc
 PROTOC := protoc
 
-.PHONY: help start-postgres stop-postgres migrate schema sqlc-generate protoc-generate openapi-generate tidy all
+.PHONY: help start-postgres stop-postgres migrate schema sqlc-generate openapi-generate tidy all
 
 help:
 	@printf "Usage:\n"
@@ -15,7 +15,7 @@ help:
 	@printf "  make migrate          Run DB migrations (uses AUTH_SERVICE_DATABASE_URL)\n"
 	@printf "  make schema           Dump DB schema to sql/schema.sql\n"
 	@printf "  make sqlc-generate    Run sqlc generate in sql\n"
-	@printf "  make protoc-generate  Generate gRPC code from backend/proto/auth/auth.proto\n"
+# 	@printf "  make protoc-generate  Generate gRPC code from backend/proto/auth/auth.proto\n"
 	@printf "  make openapi-generate Run OpenAPI generation (go run api/generate.go from repo root)\n"
 	@printf "  make tidy             Run go mod tidy in backend/servicies/auth\n"
 	@printf "  make all              Run migrate, schema, sqlc-generate, protoc-generate, openapi-generate, tidy\n"
@@ -40,9 +40,9 @@ sqlc-generate:
 	@echo "Generating sqlc code..."
 	@cd sql && $(SQLC) generate
 
-protoc-generate:
-	@echo "Generating protobuf (gRPC) code..."
-	@cd ../../proto/auth && $(PROTOC) --go_out=../../servicies/auth/internal/infrastructure/grpc/ --go-grpc_out=../../servicies/auth/internal/infrastructure/grpc/ auth.proto
+# protoc-generate:
+# 	@echo "Generating protobuf (gRPC) code..."
+# 	@cd ../../proto/auth && $(PROTOC) --go_out=../../servicies/auth/internal/infrastructure/grpc/ --go-grpc_out=../../servicies/auth/internal/infrastructure/grpc/ auth.proto
 
 openapi-generate:
 	@echo "Generating OpenAPI code (run from repo root)..."
@@ -52,4 +52,4 @@ tidy:
 	@echo "Running go mod tidy in backend/servicies/auth..."
 	@go mod tidy
 
-all: stop-postgres start-postgres migrate schema sqlc-generate protoc-generate openapi-generate tidy
+all: stop-postgres start-postgres migrate schema sqlc-generate openapi-generate tidy

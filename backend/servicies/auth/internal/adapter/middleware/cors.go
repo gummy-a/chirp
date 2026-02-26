@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"os"
 )
-
+// TODO: refactor me;
+// move middleware/ into infrastructure/http/middleware/
 func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		allowOrigin := os.Getenv("AUTH_SERVICE_ALLOW_ORIGIN")
