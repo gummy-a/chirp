@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
 )
 
 const (
@@ -12,12 +11,7 @@ const (
 )
 
 func (h *QueueHandler) EnqueueJob(input *entity.EncodeJob) error {
-	job := entity.EncodeJob{
-		InputFile: domain.InputFile(input.InputFile),
-		MimeType:  domain.MimeType(input.MimeType),
-	}
-
-	json, err := json.Marshal(job)
+	json, err := json.Marshal(*input)
 	if err != nil {
 		return err
 	}

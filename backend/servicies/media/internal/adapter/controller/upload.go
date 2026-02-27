@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gummy_a/chirp/media/internal/adapter/converter"
-	"github.com/gummy_a/chirp/media/internal/domain/value_object"
+	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/http/middleware"
 	api "github.com/gummy_a/chirp/media/internal/infrastructure/http/openapi/media/go"
 	"github.com/gummy_a/chirp/media/internal/usecase"
@@ -35,9 +35,9 @@ func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplR
 		}}, nil
 	}
 
-	originamFileInfo, err := converter.ToOriginalFileInfo(files)
+	originamFileInfo, err := converter.ToUploadedFileInfo(files)
 	if err != nil {
-		s.logger.Error("Failed ToOriginalFileInfo()", slog.String("error", err.Error()))
+		s.logger.Error("Failed ToUploadedFileInfo()", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 400, Body: api.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "failed to EnqueueEncode",
@@ -59,7 +59,7 @@ func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplR
 	var response []api.ApiMediaV1UploadPost200ResponseInner
 	for _, v := range *output {
 		response = append(response, api.ApiMediaV1UploadPost200ResponseInner{
-			Message: fmt.Sprintf("upload %s accepted", v.UnprocessedFileUrl),
+			Message: fmt.Sprintf("upload %s accepted", v.FileUrl),
 		})
 	}
 

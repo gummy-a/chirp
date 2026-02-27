@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	"github.com/gummy_a/chirp/media/internal/domain/value_object"
+	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
 	"github.com/gummy_a/chirp/media/internal/usecase/repository"
 )
 
 type MediaUploadInput struct {
-	Files          []entity.OriginalFileInfo
+	Files          []entity.UploadedFileInfo
 	OwnerAccountId domain.OwnerAccountId
 }
 
 type MediaUploadOutput struct {
-	UnprocessedFileUrl domain.UnprocessedFileUrl
-	FileType           domain.FileType
+	FileUrl  domain.FileUrl
+	MimeType domain.MimeType
 }
 
 type QueueHandler interface {
@@ -34,12 +34,12 @@ func NewMediaUploadUseCase(r repository.MediaRepository, q QueueHandler) *MediaC
 	}
 }
 
-func (u *MediaControlUseCase) toMediaUploadOutput(in []entity.OriginalFileInfo) []MediaUploadOutput {
+func (u *MediaControlUseCase) toMediaUploadOutput(in []entity.UploadedFileInfo) []MediaUploadOutput {
 	var out []MediaUploadOutput
 	for _, file := range in {
 		out = append(out, MediaUploadOutput{
-			UnprocessedFileUrl: domain.UnprocessedFileUrl(file.UnprocessedFileUrl),
-			FileType:           domain.FileType(file.FileType),
+			FileUrl:  domain.FileUrl(file.FileUrl),
+			MimeType: domain.MimeType(file.MimeType),
 		})
 	}
 	return out
@@ -48,8 +48,12 @@ func (u *MediaControlUseCase) toMediaUploadOutput(in []entity.OriginalFileInfo) 
 func (u *MediaControlUseCase) EnqueueEncode(ctx context.Context, input *MediaUploadInput) (*[]MediaUploadOutput, error) {
 	for _, v := range input.Files {
 		err := u.queue.EnqueueJob(&entity.EncodeJob{
-			InputFile: domain.InputFile(v.UnprocessedFileUrl),
-			MimeType:  domain.MimeType(v.FileType),
+			FileInfo: entity.UploadedFileInfo{
+				UploadedFilePath: domain.UploadedFilePath(v.UploadedFilePath),
+				FileUrl:          domain.FileUrl(v.FileUrl),
+				MimeType:         domain.MimeType(v.MimeType),
+			},
+			OwnerAccountId: input.OwnerAccountId,
 		})
 		if err != nil {
 			return nil, err

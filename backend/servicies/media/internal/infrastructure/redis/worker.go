@@ -6,10 +6,9 @@ import (
 	"os/exec"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
 )
 
-func (h *QueueHandler) ExecuteJob(inputFile domain.InputFile) {
+func (h *QueueHandler) ExecuteJob() {
 	for {
 		result, err := h.rdb.BLPop(h.ctx, 0, QueueName).Result()
 		if err != nil {
@@ -23,28 +22,28 @@ func (h *QueueHandler) ExecuteJob(inputFile domain.InputFile) {
 		var cmd *exec.Cmd
 		var output string
 
-		switch job.MimeType {
+		switch job.FileInfo.MimeType {
 		case "video/mp4":
-			output = string(job.InputFile) + ".encoded.mp4"
-			cmd = exec.Command("ffmpeg", "-i", string(job.InputFile), "-c:v", "libx264", "-crf", "25", "-c:a", "aac", output, "-y")
+			output = string(job.FileInfo.UploadedFilePath) + ".encoded.mp4"
+			cmd = exec.Command("ffmpeg", "-i", string(job.FileInfo.UploadedFilePath), "-c:v", "libx264", "-crf", "25", "-c:a", "aac", output, "-y")
 
 		case "image/png":
 			fallthrough
 		case "image/jpeg":
 			fallthrough
 		case "image/webp":
-			output = string(job.InputFile) + ".encoded.webp"
-			cmd = exec.Command("ffmpeg", "-i", string(job.InputFile), "-q:v", "75", output, "-y")
+			output = string(job.FileInfo.UploadedFilePath) + ".encoded.webp"
+			cmd = exec.Command("ffmpeg", "-i", string(job.FileInfo.UploadedFilePath), "-q:v", "75", output, "-y")
 
 		default:
-			h.logger.Error("not allowed mime type", slog.String("mime type", string(job.MimeType)))
+			h.logger.Error("not allowed mime type", slog.String("mime type", string(job.FileInfo.MimeType)))
 			continue
 		}
 
 		if err := cmd.Run(); err != nil {
 			h.logger.Error("ffmpeg failed", slog.String("error", err.Error()))
 		} else {
-			h.logger.Info("Encoding finished successfully: ", slog.String("input", string(job.InputFile)), slog.String("output", output))
+			h.logger.Info("Encoding finished successfully: ", slog.String("input", string(job.FileInfo.UploadedFilePath)), slog.String("output", output))
 		}
 	}
 }

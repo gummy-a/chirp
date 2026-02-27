@@ -5,7 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	"github.com/gummy_a/chirp/media/internal/domain/value_object"
+	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/db/sqlc"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -20,7 +20,7 @@ func NewMediaRepository(db *pgxpool.Pool, q *sqlc.Queries, logger *slog.Logger) 
 	return &MediaRepository{db: db, sql: q, logger: logger}
 }
 
-func (r *MediaRepository) Save(ctx context.Context, files *[]entity.OriginalFileInfo, owner_account_id *domain.OwnerAccountId) error {
+func (r *MediaRepository) Save(ctx context.Context, files *[]entity.UploadedFileInfo, owner_account_id *domain.OwnerAccountId) error {
 	// TODO: implement enqueue
 	//TODO: imple Save()
 	return nil

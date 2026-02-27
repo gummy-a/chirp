@@ -1,5 +1,5 @@
 package domain
 
-type InputFile string
+type InputFileName string
 type MimeType string
 type EncodedFile string

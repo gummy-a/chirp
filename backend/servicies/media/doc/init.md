@@ -56,7 +56,7 @@ cd sql
 sqlc generate
 ```
 
-### 4. media.protoからコードを生成する
+<!-- ### 4. media.protoからコードを生成する
 
 #### 4.1 protocol buffer コンパイラをインストール(option)
 
@@ -71,7 +71,7 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 cd backend/proto/media
 protoc --go_out=../../servicies/media/internal/infrastructure/grpc/ --go-grpc_out=../../servicies/media/internal/infrastructure/grpc/ media.proto
 
-```
+``` -->
 
 ### 5. OpenAPIからコードを生成する
 
