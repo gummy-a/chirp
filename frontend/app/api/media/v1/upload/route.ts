@@ -17,22 +17,14 @@ export async function POST(req: Request) {
       baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
     });
 
-    if (ret.response.ok) {
-      return new Response(JSON.stringify(ret.data), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
-
-    return new Response(await ret.response.json(), {
-      status: 400,
+    return new Response(JSON.stringify(ret.data), {
+      status: ret.response.ok ? 200 : 400,
       headers: {
         "Content-Type": "application/json",
       },
     });
   } catch (e) {
+    console.error(e);
     return new Response(JSON.stringify({ error: e }), {
       status: 400,
       headers: {

@@ -1,7 +1,7 @@
 "use client";
 
 import "./button.css";
-import { SubmitEvent } from "react";
+import { SubmitEvent, useRef, useState } from "react";
 
 const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
@@ -11,13 +11,23 @@ const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     method: "POST",
     body: formData,
   });
-  const data = await ret.json();
-  console.log(data);
+
+  return await ret.json();
 };
 
 export const UploadForm = () => {
+  const ref = useRef<HTMLFormElement>(null);
+  const [disabled, setDisabled] = useState(false);
+
+  const submit = async (e: SubmitEvent<HTMLFormElement>) => {
+    setDisabled(true);
+    await onSubmit(e);
+    setDisabled(false);
+    ref.current?.reset();
+  }
+
   return (
-    <form encType="multipart/form-data" onSubmit={(e) => onSubmit(e)}>
+    <form ref={ref} encType="multipart/form-data" onSubmit={(e) => submit(e)}>
       <h1 className="text-2xl font-bold mb-4">File Upload</h1>
       <div className="mb-4">
         <label htmlFor="file">select upload files</label>
@@ -33,10 +43,11 @@ export const UploadForm = () => {
       </div>
       <div>
         <button
-          className="w-full bg-blue-500 text-white p-2 rounded"
+          className={`w-full ${disabled ? "bg-gray-500" : "bg-blue-500"} text-white p-2 rounded`}
           type="submit"
+          disabled={disabled}
         >
-          submit
+          {disabled ? "uploading..." : "submit"}
         </button>
       </div>
     </form>

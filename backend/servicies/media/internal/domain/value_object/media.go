@@ -10,9 +10,8 @@ import (
 type MediaId uuid.UUID
 type OwnerAccountId uuid.UUID
 type CreatedAt time.Time
-type FileType string
-type OriginalFileName string   // アップロード時の元ファイル名
-type UnprocessedFileUrl string // 未加工の生データ
+type UploadedFilePath string // アップロード時の元ファイル名を含めたフルパス
+type FileUrl string          // 未加工の生データ
 type MediaFile os.File
 
 func (id *MediaId) ParseString(s string) error {

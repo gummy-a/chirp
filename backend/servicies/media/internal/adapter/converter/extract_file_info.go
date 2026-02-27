@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	"github.com/gummy_a/chirp/media/internal/domain/value_object"
+	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
 )
 
 func getMimeType(filePath string) (string, error) {
@@ -25,8 +25,8 @@ func getMimeType(filePath string) (string, error) {
 	return http.DetectContentType(buffer), nil
 }
 
-func ToOriginalFileInfo(files []*os.File) (*[]entity.OriginalFileInfo, error) {
-	var entityFiles []entity.OriginalFileInfo
+func ToUploadedFileInfo(files []*os.File) (*[]entity.UploadedFileInfo, error) {
+	var entityFiles []entity.UploadedFileInfo
 	for _, v := range files {
 		mime, err := getMimeType(v.Name())
 		if err != nil {
@@ -35,10 +35,10 @@ func ToOriginalFileInfo(files []*os.File) (*[]entity.OriginalFileInfo, error) {
 
 		uuid := uuid.NewString()
 
-		entityFiles = append(entityFiles, entity.OriginalFileInfo{
-			OriginalFileName:   domain.OriginalFileName(v.Name()),
-			UnprocessedFileUrl: domain.UnprocessedFileUrl("/assets/media/" + uuid),
-			FileType:           domain.FileType(mime),
+		entityFiles = append(entityFiles, entity.UploadedFileInfo{
+			UploadedFilePath: domain.UploadedFilePath(v.Name()),
+			FileUrl:          domain.FileUrl("/assets/media/" + uuid),
+			MimeType:         domain.MimeType(mime),
 		})
 	}
 	return &entityFiles, nil
