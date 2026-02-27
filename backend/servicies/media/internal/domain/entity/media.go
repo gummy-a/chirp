@@ -13,7 +13,7 @@ type Media struct {
 }
 
 type OriginalFileInfo struct {
-	OriginalFileName   domain.OriginalFileName // uriにする前の元ファイル名
+	OriginalFileName   domain.OriginalFileName
 	UnprocessedFileUrl domain.UnprocessedFileUrl
 	FileType           domain.FileType
 }

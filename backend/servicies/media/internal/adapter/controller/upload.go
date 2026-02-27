@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 
@@ -43,7 +44,7 @@ func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplR
 		}}, nil
 	}
 
-	_, err = s.usecase.EnqueueEncode(ctx, &usecase.MediaUploadInput{
+	output, err := s.usecase.EnqueueEncode(ctx, &usecase.MediaUploadInput{
 		Files:          *originamFileInfo,
 		OwnerAccountId: ownerAccountId,
 	})
@@ -55,8 +56,12 @@ func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplR
 		}}, nil
 	}
 
-	// TODO: response 200 OK
-	return api.ImplResponse{Code: 200, Body: []api.ApiMediaV1UploadPost200ResponseInner{
-		{Message: "success"},
-	}}, nil
+	var response []api.ApiMediaV1UploadPost200ResponseInner
+	for _, v := range *output {
+		response = append(response, api.ApiMediaV1UploadPost200ResponseInner{
+			Message: fmt.Sprintf("upload %s accepted", v.UnprocessedFileUrl),
+		})
+	}
+
+	return api.ImplResponse{Code: 200, Body: response}, nil
 }

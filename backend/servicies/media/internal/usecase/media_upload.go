@@ -55,7 +55,7 @@ func (u *MediaControlUseCase) EnqueueEncode(ctx context.Context, input *MediaUpl
 			return nil, err
 		}
 	}
-	
+
 	out := u.toMediaUploadOutput(input.Files)
 	return &out, nil
 }
