@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "prebuild": "npm run fmt && npm run lint",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0",
     "lint": "eslint",
-    "fmt": "prettier --write app components",
+    "fmt": "prettier --write app components lib",
     "openapi": "openapi-ts"
   },
   "dependencies": {

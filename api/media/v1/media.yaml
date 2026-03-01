@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: メディアAPI
+  version: 0.1.0
+  description: メディアアップロードや情報の取得を行うAPI
+
+# ========================================================================
+# 全APIでAuthorization: Bearer必須とする
+# ========================================================================
+security:
+  - bearerAuth: [] 
+
+paths:
+
+# ========================================================================
+# ファイルアップロード
+# ========================================================================
+  /api/media/v1/upload/:
+    post:
+      summary: 複数ファイルを同時にアップロードする
+      description: |-
+        画像または動画ファイルをユーザー情報と同時にアップロードします。
+        ファイルのアップロードが完了したら一旦200OKを返します。
+        そのあとencode serviceにファイルを引き渡し、エンコードします。
+        エンコードはffmpegで下記を実施します。
+
+        画像は長辺を2048pxになるよう縮小する
+        画像サイズに関わらず、quality 75でwebpに圧縮する
+        動画は長辺を720pxになるよう縮小する
+        動画はcrf 25で圧縮する
+        画像は3MB, 動画は10MB以上を弾く
+      requestBody:
+        content:
+          multipart/form-data:
+            schema: 
+              type: object
+              properties:
+                files:
+                  description: アップロードするファイル群
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+
+      responses:
+        '200': # 全てのファイルが適合だった場合のみ2xxを返す, 1つでもエラーなら4xxを返す
+          description: アップロードを待ち行列に追加した(処理中)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: 処理中を受け付けたファイルの情報
+                      example: "accept encode file hoge.png"
+
+        '400':
+          description: ファイルが不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+# ------------------------------------------------------------------------
+# components
+# ------------------------------------------------------------------------
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    FileUploadResponse:
+      type: object
+      required:
+        - file_url
+        - file_type
+      properties:
+        original_file_url: # 無加工のオリジナルファイルのurl
+          type: string
+          format: uri
+        file_type:
+          type: string
+          enum: [image, video] # gif,apngはimageとして扱う
+        thumbnail_image_url: # 画像のサムネイル
+          type: string
+          nullable: true
+          format: uri
+        encoded_image_url: # 圧縮済み画像(これを標準使用する)
+          type: string
+          nullable: true
+          format: uri
+        thumbnail_video_url: # 動画のサムネイル
+          type: string
+          nullable: true
+          format: uri
+        encoded_video_url: # 圧縮済み動画(これを標準使用する)
+          type: string
+          nullable: true
+# ------------------------------------------------------------------------
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラーコード
+          example: "UNAUTHORIZED"
+        message:
+          type: string
+          description: エラーの詳細内容
+          example: "メールアドレスまたはパスワードが正しくありません。"

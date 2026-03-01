@@ -8,51 +8,62 @@ import (
 	"strings"
 )
 
-var authAPI = []string{
-	"api/auth/v1/auth.yaml",
+func generate(api, openapi, outpath string) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	cmd := exec.Command("java", "-jar", openapi, "generate", "-i", api, "-g", "go-server", "-o", outpath, "-c", "api/config.json")
+
+	_, err = cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.Chdir(outpath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.Remove("go.mod")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.Remove("main.go")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.Chdir(currentDir)
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Printf("generated %s\n", api)
 }
 
-func generateAuthServerAPI(openapi string) {
-	for _, api := range authAPI {
-		fmt.Printf("generate %s ...\n", api)
-		p := strings.Split(api, "/")
-		filename := strings.Split(p[len(p)-1], ".")[0]
-		outpath := "backend/servicies/auth/internal/infrastructure/auth/openapi/"+filename
+func generateAuthServiceAPI(openapi string) {
+	api := "api/auth/v1/auth.yaml"
 
-		currentDir, err := os.Getwd()
-		if err != nil {
-			log.Println(err)
-		}
+	fmt.Printf("generate %s ...\n", api)
+	p := strings.Split(api, "/")
+	filename := strings.Split(p[len(p)-1], ".")[0]
+	outpath := "backend/servicies/auth/internal/infrastructure/auth/openapi/"+filename
 
-		cmd := exec.Command("java", "-jar", openapi, "generate", "-i", api, "-g", "go-server", "-o", outpath, "-c", "api/config.json")
+	generate(api, openapi, outpath)
+}
 
-		_, err = cmd.Output()
-		if err != nil {
-			log.Fatal(err)
-		}
+func generateMediaServiceAPI(openapi string) {
+	api := "api/media/v1/media.yaml"
 
-		err = os.Chdir(outpath)
-		if err != nil {
-			log.Fatal(err)
-		}
+	fmt.Printf("generate %s ...\n", api)
+	p := strings.Split(api, "/")
+	filename := strings.Split(p[len(p)-1], ".")[0]
+	outpath := "backend/servicies/media/internal/infrastructure/http/openapi/"+filename
 
-		err = os.Remove("go.mod")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = os.Remove("main.go")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = os.Chdir(currentDir)
-		if err != nil {
-			log.Println(err)
-		}
-
-		fmt.Printf("generated %s\n", api)
-	}
+	generate(api, openapi, outpath)
 }
 
 func main() {
@@ -61,5 +72,6 @@ func main() {
 		openapi = "/usr/local/bin/openapi-generator-cli.jar"
 	}
 
-	generateAuthServerAPI(openapi)
+	generateAuthServiceAPI(openapi)
+	generateMediaServiceAPI(openapi)
 }

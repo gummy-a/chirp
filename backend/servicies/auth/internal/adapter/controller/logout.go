@@ -6,14 +6,27 @@ import (
 
 	"github.com/gummy_a/chirp/auth/internal/adapter/dto"
 	api "github.com/gummy_a/chirp/auth/internal/infrastructure/auth/openapi/auth/go"
+	loginLogoutUseCase "github.com/gummy_a/chirp/auth/internal/usecase/login_logout"
 )
 
-func (h *AppHandler) ApiAuthV1LogoutPost(ctx context.Context, req api.ApiAuthV1LogoutPostRequest) (api.ImplResponse, error) {
+type LogoutHandler struct {
+	logoutUseCase *loginLogoutUseCase.LogoutAccountUseCase
+	logger        *slog.Logger
+}
+
+func NewLogoutHandler(logout *loginLogoutUseCase.LogoutAccountUseCase, logger *slog.Logger) *LogoutHandler {
+	return &LogoutHandler{
+		logoutUseCase: logout,
+		logger:        logger,
+	}
+}
+
+func (l *LogoutHandler) Logout(ctx context.Context, req api.ApiAuthV1LogoutPostRequest) (api.ImplResponse, error) {
 	input := dto.ToLogoutInput(req)
 
-	_, err := h.logoutUseCase.Execute(ctx, input)
+	_, err := l.logoutUseCase.Execute(ctx, input)
 	if err != nil {
-		h.logger.Error("Failed to execute logout", slog.String("error", err.Error()))
+		l.logger.Error("Failed to execute logout", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 401, Body: api.ErrorResponse{
 			Error:   "Unauthorized",
 			Message: "failed to logout account",

@@ -15,6 +15,7 @@ const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     },
     throwOnError: false,
     credentials: "include",
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
   });
 
   return ret;

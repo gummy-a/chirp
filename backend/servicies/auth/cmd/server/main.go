@@ -2,17 +2,20 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 
 	controller "github.com/gummy_a/chirp/auth/internal/adapter/controller"
+	"github.com/gummy_a/chirp/auth/internal/adapter/controller/router"
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db"
 	"github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/db/sqlc"
 	repository "github.com/gummy_a/chirp/auth/internal/infrastructure/persistence/repository/impl"
 	loginLogoutUseCase "github.com/gummy_a/chirp/auth/internal/usecase/login_logout"
 	signupUseCase "github.com/gummy_a/chirp/auth/internal/usecase/signup"
+	"github.com/joho/godotenv"
 )
 
 func setDefaultEnvironmentVariables() {
@@ -21,7 +24,12 @@ func setDefaultEnvironmentVariables() {
 		os.Setenv("AUTH_SERVICE_PORT", "8080")
 		os.Setenv("AUTH_SERVICE_JWT_SECRET_KEY", "PSsDWRYMnGnLZpq1uq4Dd24WnGncTBkbtciiXzFNqGPHyJ")
 		os.Setenv("AUTH_SERVICE_ALLOW_ORIGIN", "http://localhost:3000") // DO NOT SET WILDCARD
-		os.Setenv("AUTH_SERVICE_DATABASE_URL", "postgres://postgres:password@localhost:5432/postgres?sslmode=disable")
+		os.Setenv("AUTH_SERVICE_DATABASE_URL", "postgres://postgres:password@localhost:5432/auth_service?sslmode=disable")
+	} else {
+		err := godotenv.Load()
+		if err != nil {
+			fmt.Printf(".env not loaded.%v\n", err)
+		}
 	}
 }
 
@@ -79,13 +87,16 @@ func main() {
 	registrationSenderRepo := repository.NewRegistrationSenderRepository(logger)
 
 	// UseCase layer: create use cases
-	SignupAccountUseCase := signupUseCase.NewSignupAccountUseCase(accountRepo, temporaryAccountRepo)
-	SignupTemporaryAccountUseCase := signupUseCase.NewSignupTemporaryAccountUseCase(temporaryAccountRepo, registrationSenderRepo)
+	signupAccountUseCase := signupUseCase.NewSignupAccountUseCase(accountRepo, temporaryAccountRepo)
+	signupTemporaryAccountUseCase := signupUseCase.NewSignupTemporaryAccountUseCase(temporaryAccountRepo, registrationSenderRepo)
 	loginUseCase := loginLogoutUseCase.NewLoginAccountUseCase(accountRepo)
 	logoutUseCase := loginLogoutUseCase.NewLogoutAccountUseCase(accountRepo)
 
 	// Adapter layer: create HTTP controllers and router
-	router := controller.NewAppRouter(SignupTemporaryAccountUseCase, SignupAccountUseCase, loginUseCase, logoutUseCase, logger)
+	signupHandler := controller.NewSignupHandler(signupAccountUseCase, signupTemporaryAccountUseCase, logger)
+	logoutHandler := controller.NewLogoutHandler(logoutUseCase, logger)
+	loginHandler := controller.NewLoginHandler(loginUseCase, logger)
+	router := router.NewAppRouter(loginHandler, logoutHandler, signupHandler, logger)
 
 	//  Start HTTP server
 	port := os.Getenv("AUTH_SERVICE_PORT")

@@ -9,14 +9,14 @@ go mod download
 
 #### 1.1 環境変数をセットする
 
-.env.sampleを参考に環境変数をセットする
+mainのcheckEnvironmentVariables()を参考に環境変数をセットする
 
 ### 2. DBをmigrateする
 
 #### 2.1 localにdockerを立てる
 
 ```
-docker run --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+run --name postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=auth_service -p 5432:5432 -d postgres
 ```
 
 #### 2.2 golang-migrateの入手と配置(option)
@@ -32,7 +32,7 @@ sudo mv migrate /usr/local/bin/
 #### 2.3 golang-migrateでmigrateする
 
 ```bash
-export AUTH_SERVICE_DATABASE_URL="postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+export AUTH_SERVICE_DATABASE_URL="postgres://postgres:password@localhost:5432/auth_service?sslmode=disable"
 migrate -path sql/migrations/ -database "$AUTH_SERVICE_DATABASE_URL" up
 ```
 
@@ -56,7 +56,7 @@ cd sql
 sqlc generate
 ```
 
-### 4. auth.protoからコードを生成する
+<!-- ### 4. auth.protoからコードを生成する
 
 #### 4.1 protocol buffer コンパイラをインストール(option)
 
@@ -71,7 +71,7 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 cd backend/proto/auth
 protoc --go_out=../../servicies/auth/internal/infrastructure/grpc/ --go-grpc_out=../../servicies/auth/internal/infrastructure/grpc/ auth.proto
 
-```
+``` -->
 
 ### 5. OpenAPIからコードを生成する
 

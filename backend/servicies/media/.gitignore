@@ -1,0 +1,5 @@
+internal/infrastructure/persistence/db/sqlc/
+internal/infrastructure/grpc/pb/
+internal/infrastructure/http/openapi/
+sql/schema.sql
+.env

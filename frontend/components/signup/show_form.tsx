@@ -15,15 +15,12 @@ export const ShowSignupForm = () => {
   useEffect(() => {
     (async () => {
       try {
-        if (localStorage.getItem("jwt_token")) {
-          router.push("/");
-        }
-
         const ret = await getApiAuthV1TmpAccountById({
           path: {
             id: token,
           },
           throwOnError: false,
+          baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
         });
 
         if (ret.response.ok && token) {

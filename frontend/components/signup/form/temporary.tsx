@@ -14,6 +14,7 @@ const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
       password: formData.get("password") as string,
     },
     throwOnError: false,
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
   });
 
   return ret;
