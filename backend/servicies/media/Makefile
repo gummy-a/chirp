@@ -17,7 +17,6 @@ help:
 	@printf "  make migrate          Run DB migrations (uses MEDIA_SERVICE_DATABASE_URL)\n"
 	@printf "  make schema           Dump DB schema to sql/schema.sql\n"
 	@printf "  make sqlc-generate    Run sqlc generate in sql\n"
-# 	@printf "  make protoc-generate  Generate gRPC code from backend/proto/media/media.proto\n"
 	@printf "  make openapi-generate Run OpenAPI generation (go run api/generate.go from repo root)\n"
 	@printf "  make tidy             Run go mod tidy in backend/servicies/media\n"
 	@printf "  make all              Run migrate, schema, sqlc-generate, openapi-generate, tidy\n"
@@ -48,10 +47,6 @@ schema:
 sqlc-generate:
 	@echo "Generating sqlc code..."
 	@cd sql && $(SQLC) generate
-
-# protoc-generate:
-# 	@echo "Generating protobuf (gRPC) code..."
-# 	@cd ../../proto/media && $(PROTOC) --go_out=../../servicies/media/internal/infrastructure/grpc/ --go-grpc_out=../../servicies/media/internal/infrastructure/grpc/ media.proto
 
 openapi-generate:
 	@echo "Generating OpenAPI code (run from repo root)..."

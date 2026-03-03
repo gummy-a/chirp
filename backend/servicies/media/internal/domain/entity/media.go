@@ -1,21 +1,21 @@
 package entity
 
 import (
-	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
+	"github.com/gummy_a/chirp/media/internal/domain/value_object"
 )
 
 type Media struct {
-	Id                domain.MediaId
-	UploaderAccountId domain.OwnerAccountId
-	CreatedAt         domain.CreatedAt
+	Id                value_object.MediaId
+	UploaderAccountId value_object.OwnerAccountId
+	CreatedAt         value_object.CreatedAt
 	UploadedFileInfo  UploadedFileInfo
 	MetaData          *MetaData
 }
 
 type UploadedFileInfo struct {
-	UploadedFilePath domain.UploadedFilePath `json:"uploaded_file_path"`
-	FileUrl          domain.FileUrl          `json:"file_url"`
-	MimeType         domain.MimeType         `json:"mime_type"`
+	OriginalFileName value_object.OriginalFileName `json:"original_file_name"`
+	FileUrl          value_object.FileUrl          `json:"file_url"`
+	MimeType         value_object.MimeType         `json:"mime_type"`
 }
 
 type Asset struct {
@@ -27,6 +27,6 @@ type Asset struct {
 }
 
 type MetaData struct {
-	Thumbnail Asset `json:"thumbnail"`
-	Encoded   Asset `json:"encoded"`
+	Thumbnail Asset   `json:"thumbnail"`
+	Encoded   []Asset `json:"encoded"`
 }

@@ -36,7 +36,7 @@ func ToUploadedFileInfo(files []*os.File) (*[]entity.UploadedFileInfo, error) {
 		uuid := uuid.NewString()
 
 		entityFiles = append(entityFiles, entity.UploadedFileInfo{
-			UploadedFilePath: domain.UploadedFilePath(v.Name()),
+			OriginalFileName: domain.OriginalFileName(v.Name()),
 			FileUrl:          domain.FileUrl("/assets/media/" + uuid),
 			MimeType:         domain.MimeType(mime),
 		})

@@ -21,7 +21,6 @@ func NewMediaRepository(db *pgxpool.Pool, q *sqlc.Queries, logger *slog.Logger) 
 }
 
 func (r *MediaRepository) Save(ctx context.Context, files *[]entity.UploadedFileInfo, owner_account_id *domain.OwnerAccountId) error {
-	// TODO: implement enqueue
-	//TODO: imple Save()
+	//TODO: implement this
 	return nil
 }

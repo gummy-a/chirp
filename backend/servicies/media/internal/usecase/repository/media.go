@@ -9,5 +9,4 @@ import (
 
 type MediaRepository interface {
 	Save(ctx context.Context, files *[]entity.UploadedFileInfo, owner_account_id *domain.OwnerAccountId) error
-	// Delete(ctx context.Context, media *entity.Media) error // TODO: imple Delete()
 }

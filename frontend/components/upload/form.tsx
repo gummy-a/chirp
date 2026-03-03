@@ -24,7 +24,7 @@ export const UploadForm = () => {
     await onSubmit(e);
     setDisabled(false);
     ref.current?.reset();
-  }
+  };
 
   return (
     <form ref={ref} encType="multipart/form-data" onSubmit={(e) => submit(e)}>

@@ -9,7 +9,6 @@ import (
 )
 
 func SetDefaultEnvironmentVariables() {
-	os.Setenv("MEDIA_SERVICE_APP_ENV", "development")
 	env := os.Getenv("MEDIA_SERVICE_APP_ENV")
 	if env == "development" {
 		os.Setenv("MEDIA_SERVICE_PORT", "8081")

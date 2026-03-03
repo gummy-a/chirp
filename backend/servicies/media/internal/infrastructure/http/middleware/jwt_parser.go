@@ -16,7 +16,7 @@ type contextKey string
 const OwnerAccountIdKey contextKey = "OwnerAccountIdKey"
 
 type Claims struct {
-	Id domain.OwnerAccountId `json:"id"`
+	Id value_object.OwnerAccountId `json:"id"`
 	jwt.RegisteredClaims
 }
 

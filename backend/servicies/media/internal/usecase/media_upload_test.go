@@ -6,6 +6,7 @@ import (
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
 	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
+	repository "github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
 	"github.com/gummy_a/chirp/media/internal/usecase"
 )
 
@@ -26,19 +27,20 @@ func TestEnqueueEncode_Success(t *testing.T) {
 
 	files := []entity.UploadedFileInfo{
 		{
-			UploadedFilePath: domain.UploadedFilePath("/tmp/upload/image-1.png"),
+			OriginalFileName: domain.OriginalFileName("/tmp/upload/image-1.png"),
 			FileUrl:          domain.FileUrl("https://cdn.example.com/raw/image-1.png"),
 			MimeType:         domain.MimeType("image/png"),
 		},
 		{
-			UploadedFilePath: domain.UploadedFilePath("/tmp/upload/movie-1.mp4"),
+			OriginalFileName: domain.OriginalFileName("/tmp/upload/movie-1.mp4"),
 			FileUrl:          domain.FileUrl("https://cdn.example.com/raw/movie-1.mp4"),
 			MimeType:         domain.MimeType("video/mp4"),
 		},
 	}
 
 	queue := &queueHandlerFake{}
-	uc := usecase.NewMediaUploadUseCase(nil, queue)
+	repo := repository.MediaRepository{}
+	uc := usecase.NewMediaUploadUseCase(repo, queue)
 
 	output, err := uc.EnqueueEncode(context.Background(), &usecase.MediaUploadInput{
 		Files:          files,
@@ -72,7 +74,7 @@ func TestEnqueueEncode_Success(t *testing.T) {
 			t.Fatalf("owner id mismatch at index %d", i)
 		}
 
-		if got.FileInfo.UploadedFilePath != want.UploadedFilePath {
+		if got.FileInfo.OriginalFileName != want.OriginalFileName {
 			t.Fatalf("uploaded file path mismatch at index %d", i)
 		}
 

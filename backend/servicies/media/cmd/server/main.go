@@ -36,13 +36,13 @@ func main() {
 
 	// Infrastructure layer: create database object
 	queries := sqlc.New(pool)
-	queue := redis.NewQueueHandler(ctx, *logger)
+	queue := redis.NewQueueHandler(ctx, *logger, *queries)
 
 	// Repository layer: create repositories
 	mediaRepository := repository.NewMediaRepository(pool, queries, logger)
 
 	// UseCase layer: create use cases
-	mediaControlUseCase := usecase.NewMediaUploadUseCase(mediaRepository, queue)
+	mediaControlUseCase := usecase.NewMediaUploadUseCase(*mediaRepository, queue)
 
 	// Adapter layer: create HTTP controllers and router
 	mediaHandler := controller.NewUploadHandler(mediaControlUseCase, logger)
