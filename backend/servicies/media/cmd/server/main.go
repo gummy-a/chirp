@@ -50,6 +50,6 @@ func main() {
 
 	//  Start HTTP server
 	port := os.Getenv("MEDIA_SERVICE_PORT")
-	log.Printf("Starting server on port %s...", port)
+	log.Printf("Starting media service server on port %s...", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }

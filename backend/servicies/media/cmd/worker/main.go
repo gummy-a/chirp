@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"os"
 
@@ -21,5 +22,6 @@ func main() {
 
 	// exec encode server
 	handler := redis.NewQueueHandler(ctx, *logger)
+	log.Printf("Starting encode service...")
 	handler.ExecuteJob()
 }
