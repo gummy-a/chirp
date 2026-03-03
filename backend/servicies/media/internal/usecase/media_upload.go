@@ -27,8 +27,8 @@ type MediaControlUseCase struct {
 	repo  repository.MediaRepository
 }
 
-func NewMediaUploadUseCase(r repository.MediaRepository, q QueueHandler) *MediaControlUseCase {
-	return &MediaControlUseCase{
+func NewMediaUploadUseCase(r repository.MediaRepository, q QueueHandler) MediaControlUseCase {
+	return MediaControlUseCase{
 		queue: q,
 		repo:  r,
 	}
@@ -45,13 +45,7 @@ func (u *MediaControlUseCase) toMediaUploadOutput(in []entity.UploadedFileInfo) 
 	return out
 }
 
-func (u *MediaControlUseCase) UploadToStorage(ctx context.Context, input *MediaUploadInput) (*[]entity.EncodeJob, error) {
-	// TODO: implement this
-	u.repo.Save(ctx, &input.Files, &input.OwnerAccountId)
-	return nil, nil
-}
-
-func (u *MediaControlUseCase) EnqueueEncode(ctx context.Context, input *MediaUploadInput) (*[]MediaUploadOutput, error) {
+func (u *MediaControlUseCase) EnqueueEncode(ctx context.Context, input MediaUploadInput) (*[]MediaUploadOutput, error) {
 	for _, v := range input.Files {
 		err := u.queue.EnqueueJob(&entity.EncodeJob{
 			FileInfo: entity.UploadedFileInfo{

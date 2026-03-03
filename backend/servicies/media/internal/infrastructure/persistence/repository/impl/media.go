@@ -2,25 +2,56 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
+	"github.com/gummy_a/chirp/media/internal/domain/value_object"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/db/sqlc"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type MediaRepository struct {
-	db     *pgxpool.Pool
-	sql    *sqlc.Queries
-	logger *slog.Logger
+	logger slog.Logger
+	sql    sqlc.Queries
+	ctx    context.Context
 }
 
-func NewMediaRepository(db *pgxpool.Pool, q *sqlc.Queries, logger *slog.Logger) *MediaRepository {
-	return &MediaRepository{db: db, sql: q, logger: logger}
+func NewMediaRepository(logger slog.Logger, sql sqlc.Queries, ctx context.Context) MediaRepository {
+	return MediaRepository{
+		logger: logger,
+		sql:    sql,
+		ctx:    ctx,
+	}
 }
 
-func (r *MediaRepository) Save(ctx context.Context, files *[]entity.UploadedFileInfo, owner_account_id *domain.OwnerAccountId) error {
-	//TODO: implement this
+func (m *MediaRepository) SaveMetaDataToDB(metadata entity.MetaData, job entity.EncodeJob) error {
+	pgtypeUUID := pgtype.UUID{
+		Bytes: [16]byte(job.OwnerAccountId),
+		Valid: true,
+	}
+
+	meta, err := json.Marshal(metadata)
+	if err != nil {
+		m.logger.Error("json.Unmarshal failed", slog.String("error", err.Error()))
+		return err
+	}
+
+	_, err = m.sql.InsertMedia(m.ctx, sqlc.InsertMediaParams{
+		OwnerAccountID:     pgtypeUUID,
+		MimeType:           string(job.FileInfo.MimeType),
+		OriginalFileName:   string(job.FileInfo.OriginalFileName),
+		UnprocessedFileUrl: string(job.FileInfo.FileUrl),
+		Metadata:           meta,
+	})
+	if err != nil {
+		m.logger.Error("InsertMedia failed", slog.String("error", err.Error()))
+		return err
+	}
+	return nil
+}
+
+func (m *MediaRepository) SaveFileToStorage(url value_object.FileUrl) error {
+	// TODO: implement this
 	return nil
 }

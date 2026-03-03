@@ -42,7 +42,7 @@ func TestEnqueueEncode_Success(t *testing.T) {
 	repo := repository.MediaRepository{}
 	uc := usecase.NewMediaUploadUseCase(repo, queue)
 
-	output, err := uc.EnqueueEncode(context.Background(), &usecase.MediaUploadInput{
+	output, err := uc.EnqueueEncode(context.Background(), usecase.MediaUploadInput{
 		Files:          files,
 		OwnerAccountId: ownerID,
 	})

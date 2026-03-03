@@ -12,11 +12,11 @@ import (
 )
 
 type AppHandler struct {
-	uploadHandler *controller.UploadHandler
-	logger        *slog.Logger
+	uploadHandler controller.UploadHandler
+	logger        slog.Logger
 }
 
-func NewAppRouter(upload *controller.UploadHandler, logger *slog.Logger) http.Handler {
+func NewAppRouter(upload controller.UploadHandler, logger slog.Logger) http.Handler {
 	server := &AppHandler{
 		uploadHandler: upload,
 		logger:        logger,

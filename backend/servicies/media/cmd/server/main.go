@@ -27,26 +27,26 @@ func main() {
 	jsoncontroller := slog.NewJSONHandler(os.Stdout, opts)
 	logger := slog.New(jsoncontroller)
 
-	// Infrastructure layer: create DB pool
-	pool, err := db.NewPool(ctx)
+	// Infrastructure layer: create DB dbPool
+	dbPool, err := db.NewConnectionPool(ctx)
 	if err != nil {
 		log.Fatalf("Failed to create database pool: %v", err)
 	}
-	defer pool.Close()
+	defer dbPool.Close()
 
 	// Infrastructure layer: create database object
-	queries := sqlc.New(pool)
-	queue := redis.NewQueueHandler(ctx, *logger, *queries)
+	sql := sqlc.New(dbPool)
+	queue := redis.NewQueueHandler(ctx, *logger)
 
 	// Repository layer: create repositories
-	mediaRepository := repository.NewMediaRepository(pool, queries, logger)
+	mediaRepository := repository.NewMediaRepository(*logger, *sql, ctx)
 
 	// UseCase layer: create use cases
-	mediaControlUseCase := usecase.NewMediaUploadUseCase(*mediaRepository, queue)
+	mediaControlUseCase := usecase.NewMediaUploadUseCase(mediaRepository, queue)
 
 	// Adapter layer: create HTTP controllers and router
-	mediaHandler := controller.NewUploadHandler(mediaControlUseCase, logger)
-	router := router.NewAppRouter(mediaHandler, logger)
+	mediaHandler := controller.NewUploadHandler(mediaControlUseCase, *logger)
+	router := router.NewAppRouter(mediaHandler, *logger)
 
 	//  Start HTTP server
 	port := os.Getenv("MEDIA_SERVICE_PORT")

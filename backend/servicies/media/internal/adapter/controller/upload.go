@@ -14,12 +14,12 @@ import (
 )
 
 type UploadHandler struct {
-	usecase *usecase.MediaControlUseCase
-	logger  *slog.Logger
+	usecase usecase.MediaControlUseCase
+	logger  slog.Logger
 }
 
-func NewUploadHandler(usecase *usecase.MediaControlUseCase, logger *slog.Logger) *UploadHandler {
-	return &UploadHandler{
+func NewUploadHandler(usecase usecase.MediaControlUseCase, logger slog.Logger) UploadHandler {
+	return UploadHandler{
 		usecase: usecase,
 		logger:  logger,
 	}
@@ -44,15 +44,10 @@ func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplR
 		}}, nil
 	}
 
-	input := &usecase.MediaUploadInput{
-		Files:          *originamFileInfo,
+	output, err := s.usecase.EnqueueEncode(ctx, usecase.MediaUploadInput{
+		Files:          originamFileInfo,
 		OwnerAccountId: ownerAccountId,
-	}
-
-	// TODO implement this
-	s.usecase.UploadToStorage(ctx, input)
-
-	output, err := s.usecase.EnqueueEncode(ctx, input)
+	})
 	if err != nil {
 		s.logger.Error("Failed to EnqueueEncode", slog.String("error", err.Error()))
 		return api.ImplResponse{Code: 400, Body: api.ErrorResponse{
