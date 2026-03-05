@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"context"
-
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
 	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
 	repository "github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
@@ -19,7 +17,7 @@ type MediaUploadOutput struct {
 }
 
 type QueueHandler interface {
-	EnqueueJob(input *entity.EncodeJob) error
+	EnqueueJob(input entity.EncodeJob) error
 }
 
 type MediaControlUseCase struct {
@@ -45,15 +43,11 @@ func (u *MediaControlUseCase) toMediaUploadOutput(in []entity.UploadedFileInfo) 
 	return out
 }
 
-func (u *MediaControlUseCase) EnqueueEncode(ctx context.Context, input MediaUploadInput) (*[]MediaUploadOutput, error) {
+func (u *MediaControlUseCase) EnqueueEncode(input MediaUploadInput) (*[]MediaUploadOutput, error) {
 	for _, v := range input.Files {
-		err := u.queue.EnqueueJob(&entity.EncodeJob{
-			FileInfo: entity.UploadedFileInfo{
-				OriginalFileName: domain.OriginalFileName(v.OriginalFileName),
-				FileUrl:          domain.FileUrl(v.FileUrl),
-				MimeType:         domain.MimeType(v.MimeType),
-			},
-			OwnerAccountId: input.OwnerAccountId,
+		err := u.queue.EnqueueJob(entity.EncodeJob{
+			UploadedFileInfo: v,
+			OwnerAccountId:   input.OwnerAccountId,
 		})
 		if err != nil {
 			return nil, err

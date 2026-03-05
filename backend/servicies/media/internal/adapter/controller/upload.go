@@ -44,7 +44,7 @@ func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplR
 		}}, nil
 	}
 
-	output, err := s.usecase.EnqueueEncode(ctx, usecase.MediaUploadInput{
+	output, err := s.usecase.EnqueueEncode(usecase.MediaUploadInput{
 		Files:          originamFileInfo,
 		OwnerAccountId: ownerAccountId,
 	})

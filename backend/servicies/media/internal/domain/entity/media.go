@@ -4,14 +4,6 @@ import (
 	"github.com/gummy_a/chirp/media/internal/domain/value_object"
 )
 
-type Media struct {
-	Id                value_object.MediaId
-	UploaderAccountId value_object.OwnerAccountId
-	CreatedAt         value_object.CreatedAt
-	UploadedFileInfo  UploadedFileInfo
-	MetaData          *MetaData
-}
-
 type UploadedFileInfo struct {
 	OriginalFileName value_object.OriginalFileName `json:"original_file_name"`
 	FileUrl          value_object.FileUrl          `json:"file_url"`
@@ -19,14 +11,18 @@ type UploadedFileInfo struct {
 }
 
 type Asset struct {
-	URL         string `json:"url"`
-	Width       int    `json:"width"`
-	Height      int    `json:"height"`
-	Type        string `json:"type"`
-	VideoLength *int   `json:"video_length,omitempty"`
+	UploadedFileInfo UploadedFileInfo `json:"file_info"`
+	Width            int              `json:"width"`
+	Height           int              `json:"height"`
+	VideoLength      *int             `json:"video_length,omitempty"`
 }
 
 type MetaData struct {
 	Thumbnail Asset   `json:"thumbnail"`
 	Encoded   []Asset `json:"encoded"`
+}
+
+type EncodeJob struct {
+	UploadedFileInfo UploadedFileInfo            `json:"file_info"`
+	OwnerAccountId   value_object.OwnerAccountId `json:"owner_account_id"`
 }

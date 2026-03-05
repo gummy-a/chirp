@@ -2,9 +2,6 @@ package encode
 
 import (
 	"errors"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
 	"log/slog"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
@@ -23,7 +20,7 @@ func NewEncoder(logger slog.Logger) Encoder {
 func (e *Encoder) Encode(job entity.EncodeJob) (*entity.MetaData, error) {
 	var metadata *entity.MetaData
 
-	switch job.FileInfo.MimeType {
+	switch job.UploadedFileInfo.MimeType {
 	case "video/mp4":
 		// TODO: implement video encode
 		// output = string(job.FileInfo.UploadedFilePath) + ".encoded.mp4"
@@ -41,7 +38,7 @@ func (e *Encoder) Encode(job entity.EncodeJob) (*entity.MetaData, error) {
 		metadata = m
 
 	default:
-		e.logger.Error("not allowed mime type", slog.String("mime type", string(job.FileInfo.MimeType)))
+		e.logger.Error("not allowed mime type", slog.String("mime type", string(job.UploadedFileInfo.MimeType)))
 		return nil, errors.New("not allowed mime type")
 	}
 

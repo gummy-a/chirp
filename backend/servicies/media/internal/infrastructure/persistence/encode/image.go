@@ -2,9 +2,6 @@ package encode
 
 import (
 	"fmt"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
 	"log/slog"
 	"os/exec"
 	"strconv"
@@ -47,17 +44,17 @@ func (e *Encoder) getImageSize(path string) (*int, *int, error) {
 
 func (e *Encoder) encodeImage(job entity.EncodeJob) (*entity.MetaData, error) {
 	var cmd *exec.Cmd
-	encoded := string(job.FileInfo.OriginalFileName) + ".encoded.webp"
-	thumbnail := string(job.FileInfo.OriginalFileName) + ".thumbnail.webp"
+	encoded := string(job.UploadedFileInfo.OriginalFileName) + ".encoded.webp"
+	thumbnail := string(job.UploadedFileInfo.OriginalFileName) + ".thumbnail.webp"
 
 	// encode
-	cmd = exec.Command("ffmpeg", "-threads", "1", "-i", string(job.FileInfo.OriginalFileName), "-vf", fmt.Sprintf("scale='if(gt(iw,ih),min(%s,iw),-1)':'if(gt(iw,ih),-1,min(%s,ih))'", ImageSizeLimit, ImageSizeLimit), "-q:v", "75", encoded, "-y")
+	cmd = exec.Command("ffmpeg", "-threads", "1", "-i", string(job.UploadedFileInfo.OriginalFileName), "-vf", fmt.Sprintf("scale='if(gt(iw,ih),min(%s,iw),-1)':'if(gt(iw,ih),-1,min(%s,ih))'", ImageSizeLimit, ImageSizeLimit), "-q:v", "75", encoded, "-y")
 	if err := cmd.Run(); err != nil {
 		e.logger.Error("ffmpeg failed", slog.String("error", err.Error()))
 	}
 
 	// create thumbnail
-	cmd = exec.Command("ffmpeg", "-threads", "1", "-i", string(job.FileInfo.OriginalFileName), "-vf", fmt.Sprintf("scale='if(gt(a,1),-1,%s)':'if(gt(a,1),%s,-1)':flags=lanczos,crop=%s:%s", ThumbnailSize, ThumbnailSize, ThumbnailSize, ThumbnailSize), thumbnail, "-y")
+	cmd = exec.Command("ffmpeg", "-threads", "1", "-i", string(job.UploadedFileInfo.OriginalFileName), "-vf", fmt.Sprintf("scale='if(gt(a,1),-1,%s)':'if(gt(a,1),%s,-1)':flags=lanczos,crop=%s:%s", ThumbnailSize, ThumbnailSize, ThumbnailSize, ThumbnailSize), thumbnail, "-y")
 	if err := cmd.Run(); err != nil {
 		e.logger.Error("ffmpeg failed", slog.String("error", err.Error()))
 	}
@@ -74,18 +71,24 @@ func (e *Encoder) encodeImage(job entity.EncodeJob) (*entity.MetaData, error) {
 
 	ret := entity.MetaData{
 		Thumbnail: entity.Asset{
-			URL:         string(value_object.CreateAssetUrl()),
+			UploadedFileInfo: entity.UploadedFileInfo{
+				OriginalFileName: value_object.OriginalFileName(thumbnail),
+				FileUrl:          value_object.FileUrl(value_object.CreateAssetUrl()),
+				MimeType:         "image/webp",
+			},
 			Width:       *thumbnailWidth,
 			Height:      *thumbnailHeight,
-			Type:        "image/webp",
 			VideoLength: nil,
 		},
 		Encoded: []entity.Asset{
 			{
-				URL:         string(value_object.CreateAssetUrl()),
+				UploadedFileInfo: entity.UploadedFileInfo{
+					OriginalFileName: value_object.OriginalFileName(encoded),
+					FileUrl:          value_object.FileUrl(value_object.CreateAssetUrl()),
+					MimeType:         value_object.MimeType(job.UploadedFileInfo.MimeType),
+				},
 				Width:       *encodedWidth,
 				Height:      *encodedHeight,
-				Type:        string(job.FileInfo.MimeType),
 				VideoLength: nil,
 			},
 		},

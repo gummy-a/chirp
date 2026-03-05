@@ -1,7 +1,6 @@
 package usecase_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
@@ -11,10 +10,10 @@ import (
 )
 
 type queueHandlerFake struct {
-	jobs []*entity.EncodeJob
+	jobs []entity.EncodeJob
 }
 
-func (f *queueHandlerFake) EnqueueJob(input *entity.EncodeJob) error {
+func (f *queueHandlerFake) EnqueueJob(input entity.EncodeJob) error {
 	f.jobs = append(f.jobs, input)
 	return nil
 }
@@ -42,7 +41,7 @@ func TestEnqueueEncode_Success(t *testing.T) {
 	repo := repository.MediaRepository{}
 	uc := usecase.NewMediaUploadUseCase(repo, queue)
 
-	output, err := uc.EnqueueEncode(context.Background(), usecase.MediaUploadInput{
+	output, err := uc.EnqueueEncode(usecase.MediaUploadInput{
 		Files:          files,
 		OwnerAccountId: ownerID,
 	})
@@ -66,23 +65,19 @@ func TestEnqueueEncode_Success(t *testing.T) {
 		got := queue.jobs[i]
 		want := files[i]
 
-		if got == nil {
-			t.Fatalf("job at index %d should not be nil", i)
-		}
-
 		if got.OwnerAccountId != ownerID {
 			t.Fatalf("owner id mismatch at index %d", i)
 		}
 
-		if got.FileInfo.OriginalFileName != want.OriginalFileName {
+		if got.UploadedFileInfo.OriginalFileName != want.OriginalFileName {
 			t.Fatalf("uploaded file path mismatch at index %d", i)
 		}
 
-		if got.FileInfo.FileUrl != want.FileUrl {
+		if got.UploadedFileInfo.FileUrl != want.FileUrl {
 			t.Fatalf("file url mismatch at index %d", i)
 		}
 
-		if got.FileInfo.MimeType != want.MimeType {
+		if got.UploadedFileInfo.MimeType != want.MimeType {
 			t.Fatalf("mime type mismatch at index %d", i)
 		}
 

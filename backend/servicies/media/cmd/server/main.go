@@ -39,7 +39,11 @@ func main() {
 	queue := redis.NewQueueHandler(ctx, *logger)
 
 	// Repository layer: create repositories
-	mediaRepository := repository.NewMediaRepository(*logger, *sql, ctx)
+	s3, err := repository.NewS3Client(ctx)
+	if err != nil {
+		log.Fatalf("Failed to create S3 client: %v", err)
+	}
+	mediaRepository := repository.NewMediaRepository(*logger, *sql, *s3, ctx)
 
 	// UseCase layer: create use cases
 	mediaControlUseCase := usecase.NewMediaUploadUseCase(mediaRepository, queue)

@@ -10,8 +10,8 @@ const (
 	QueueName = "encode_queue"
 )
 
-func (h *QueueHandler) EnqueueJob(input *entity.EncodeJob) error {
-	json, err := json.Marshal(*input)
+func (h *QueueHandler) EnqueueJob(input entity.EncodeJob) error {
+	json, err := json.Marshal(input)
 	if err != nil {
 		return err
 	}

@@ -16,6 +16,8 @@ func SetDefaultEnvironmentVariables() {
 		os.Setenv("MEDIA_SERVICE_ALLOW_ORIGIN", "http://localhost:3000")                            // DO NOT SET WILDCARD
 		os.Setenv("MEDIA_SERVICE_DATABASE_URL", "postgres://postgres:password@localhost:5432/media_service?sslmode=disable")
 		os.Setenv("MEDIA_SERVICE_REDIS_URL", "localhost:6379")
+		os.Setenv("MEDIA_SERVICE_S3_BUCKET_NAME", "dev-backet-for-chirp")
+		os.Setenv("MEDIA_SERVICE_S3_REAGION", "us-east-1")
 	} else {
 		err := godotenv.Load()
 		if err != nil {
@@ -53,5 +55,15 @@ func CheckEnvironmentVariables() {
 	redis := os.Getenv("MEDIA_SERVICE_REDIS_URL")
 	if env == "production" && redis == "" {
 		log.Fatal("MEDIA_SERVICE_REDIS_URL is not set")
+	}
+
+	s3 := os.Getenv("MEDIA_SERVICE_S3_BUCKET_NAME")
+	if env == "production" && s3 == "" {
+		log.Fatal("MEDIA_SERVICE_S3_BUCKET_NAME is not set")
+	}
+
+	region := os.Getenv("MEDIA_SERVICE_S3_REAGION")
+	if env == "production" && region == "" {
+		log.Fatal("MEDIA_SERVICE_S3_REAGION is not set")
 	}
 }

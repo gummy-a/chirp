@@ -2,14 +2,13 @@ package repository
 
 import (
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	"github.com/gummy_a/chirp/media/internal/domain/value_object"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/encode"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/redis"
 )
 
 func NewSaveStrategy(e encode.Encoder, r MediaRepository) redis.Worker {
 	return func(job entity.EncodeJob) error {
-		err := r.SaveFileToStorage(job.FileInfo.FileUrl)
+		err := r.SaveFileToStorage(job.UploadedFileInfo)
 		if err != nil {
 			return err
 		}
@@ -20,7 +19,7 @@ func NewSaveStrategy(e encode.Encoder, r MediaRepository) redis.Worker {
 		}
 
 		for _, v := range metadata.Encoded {
-			err = r.SaveFileToStorage(value_object.FileUrl(v.URL))
+			err = r.SaveFileToStorage(v.UploadedFileInfo)
 			if err != nil {
 				return err
 			}
