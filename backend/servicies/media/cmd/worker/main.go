@@ -11,7 +11,7 @@ import (
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/db"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/db/sqlc"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/encode"
-	repository "github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
+	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/redis"
 )
 

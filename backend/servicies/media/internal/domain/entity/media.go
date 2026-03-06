@@ -25,4 +25,11 @@ type MetaData struct {
 type EncodeJob struct {
 	UploadedFileInfo UploadedFileInfo            `json:"file_info"`
 	OwnerAccountId   value_object.OwnerAccountId `json:"owner_account_id"`
+	JobId            value_object.JobId          `json:"job_id"`
+}
+
+type JobStatus struct {
+	Status  value_object.Status   `json:"status"`
+	MediaId *value_object.MediaId `json:"media_id,omitempty"`
+	Message *value_object.Message `json:"message,omitempty"`
 }

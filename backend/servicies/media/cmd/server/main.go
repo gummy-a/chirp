@@ -8,11 +8,11 @@ import (
 	"os"
 
 	"github.com/gummy_a/chirp/media/cmd"
-	controller "github.com/gummy_a/chirp/media/internal/adapter/controller"
+	"github.com/gummy_a/chirp/media/internal/adapter/controller"
 	"github.com/gummy_a/chirp/media/internal/adapter/controller/router"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/db"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/db/sqlc"
-	repository "github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
+	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/redis"
 	"github.com/gummy_a/chirp/media/internal/usecase"
 )
@@ -47,9 +47,11 @@ func main() {
 
 	// UseCase layer: create use cases
 	mediaControlUseCase := usecase.NewMediaUploadUseCase(mediaRepository, queue)
+	uploadEventUseCase := usecase.NewUploadEventUseCase(mediaRepository, queue)
+
 
 	// Adapter layer: create HTTP controllers and router
-	mediaHandler := controller.NewUploadHandler(mediaControlUseCase, *logger)
+	mediaHandler := controller.NewUploadHandler(mediaControlUseCase, uploadEventUseCase, *logger)
 	router := router.NewAppRouter(mediaHandler, *logger)
 
 	//  Start HTTP server

@@ -4,40 +4,46 @@ import (
 	"testing"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
-	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
-	repository "github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
+	"github.com/gummy_a/chirp/media/internal/domain/value_object"
+	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/repository/impl"
 	"github.com/gummy_a/chirp/media/internal/usecase"
 )
 
-type queueHandlerFake struct {
+type queueUseCaseFake struct {
 	jobs []entity.EncodeJob
 }
 
-func (f *queueHandlerFake) EnqueueJob(input entity.EncodeJob) error {
+func (f *queueUseCaseFake) EnqueueJob(input entity.EncodeJob) error {
 	f.jobs = append(f.jobs, input)
 	return nil
 }
 
+func (f *queueUseCaseFake) SubscribeStatus(jobId value_object.JobId) (<-chan entity.JobStatus, error) {
+	ch := make(chan entity.JobStatus)
+	close(ch)
+	return ch, nil
+}
+
 func TestEnqueueEncode_Success(t *testing.T) {
-	var ownerID domain.OwnerAccountId
+	var ownerID value_object.OwnerAccountId
 	if err := ownerID.ParseString("6991c26a-8414-8324-9935-5b15cadb1c94"); err != nil {
 		t.Fatalf("failed to parse owner id: %v", err)
 	}
 
 	files := []entity.UploadedFileInfo{
 		{
-			OriginalFileName: domain.OriginalFileName("/tmp/upload/image-1.png"),
-			FileUrl:          domain.FileUrl("https://cdn.example.com/raw/image-1.png"),
-			MimeType:         domain.MimeType("image/png"),
+			OriginalFileName: value_object.OriginalFileName("/tmp/upload/image-1.png"),
+			FileUrl:          value_object.FileUrl("https://cdn.example.com/raw/image-1.png"),
+			MimeType:         value_object.MimeType("image/png"),
 		},
 		{
-			OriginalFileName: domain.OriginalFileName("/tmp/upload/movie-1.mp4"),
-			FileUrl:          domain.FileUrl("https://cdn.example.com/raw/movie-1.mp4"),
-			MimeType:         domain.MimeType("video/mp4"),
+			OriginalFileName: value_object.OriginalFileName("/tmp/upload/movie-1.mp4"),
+			FileUrl:          value_object.FileUrl("https://cdn.example.com/raw/movie-1.mp4"),
+			MimeType:         value_object.MimeType("video/mp4"),
 		},
 	}
 
-	queue := &queueHandlerFake{}
+	queue := &queueUseCaseFake{}
 	repo := repository.MediaRepository{}
 	uc := usecase.NewMediaUploadUseCase(repo, queue)
 

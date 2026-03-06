@@ -7,26 +7,28 @@ import (
 	"os"
 
 	"github.com/gummy_a/chirp/media/internal/adapter/converter"
-	domain "github.com/gummy_a/chirp/media/internal/domain/value_object"
+	"github.com/gummy_a/chirp/media/internal/domain/value_object"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/http/middleware"
 	api "github.com/gummy_a/chirp/media/internal/infrastructure/http/openapi/media/go"
 	"github.com/gummy_a/chirp/media/internal/usecase"
 )
 
 type UploadHandler struct {
-	usecase usecase.MediaControlUseCase
+	u usecase.MediaControlUseCase
+	m usecase.UploadEventUseCase
 	logger  slog.Logger
 }
 
-func NewUploadHandler(usecase usecase.MediaControlUseCase, logger slog.Logger) UploadHandler {
+func NewUploadHandler(usecase usecase.MediaControlUseCase, m usecase.UploadEventUseCase, logger slog.Logger) UploadHandler {
 	return UploadHandler{
-		usecase: usecase,
+		u: usecase,
+		m: m,
 		logger:  logger,
 	}
 }
 
 func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplResponse, error) {
-	ownerAccountId, ok := ctx.Value(middleware.OwnerAccountIdKey).(domain.OwnerAccountId)
+	ownerAccountId, ok := ctx.Value(middleware.OwnerAccountIdKey).(value_object.OwnerAccountId)
 	if !ok {
 		s.logger.Error("Failed to get accountId from context")
 		return api.ImplResponse{Code: 400, Body: api.ErrorResponse{
@@ -44,7 +46,7 @@ func (s *UploadHandler) Upload(ctx context.Context, files []*os.File) (api.ImplR
 		}}, nil
 	}
 
-	output, err := s.usecase.EnqueueEncode(usecase.MediaUploadInput{
+	output, err := s.u.EnqueueEncode(usecase.MediaUploadInput{
 		Files:          originamFileInfo,
 		OwnerAccountId: ownerAccountId,
 	})

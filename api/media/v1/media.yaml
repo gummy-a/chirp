@@ -24,7 +24,7 @@ paths:
         そのあとencode serviceにファイルを引き渡し、エンコードします。
         エンコードはffmpegで下記を実施します。
 
-        画像は長辺を2048pxになるよう縮小する
+        画像は長辺を2000pxになるよう縮小する
         画像サイズに関わらず、quality 75でwebpに圧縮する
         動画は長辺を720pxになるよう縮小する
         動画はcrf 25で圧縮する
@@ -43,7 +43,7 @@ paths:
                     format: binary
 
       responses:
-        '200': # 全てのファイルが適合だった場合のみ2xxを返す, 1つでもエラーなら4xxを返す
+        '202': # 全てのファイルが適合だった場合のみ202を返す, 1つでもエラーなら4xxを返す
           description: アップロードを待ち行列に追加した(処理中)
           content:
             application/json:
@@ -52,13 +52,41 @@ paths:
                 items:
                   type: object
                   properties:
-                    message:
+                    job_id:
                       type: string
-                      description: 処理中を受け付けたファイルの情報
-                      example: "accept encode file hoge.png"
+                      description: 処理中を受け付けたファイルのjobid
 
         '400':
           description: ファイルが不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+# ========================================================================
+# エンコード進捗通知 (SSE)
+# ========================================================================
+  /api/media/v1/upload/events/{job_id}/:
+    get:
+      summary: エンコード進捗をリアルタイム通知する (SSE)
+      description: |-
+        指定した job_id のエンコード進捗を Server-Sent Events で配信します。
+        `data: {"status": "processing", "progress": 50}`
+        `data: {"status": "completed", "fileUrl": "..."}`
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SSE接続確立
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/UploadProgressEvent'
+        '404':
+          description: 指定されたジョブが見つからない
           content:
             application/json:
               schema:
@@ -73,33 +101,25 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    FileUploadResponse:
+# ------------------------------------------------------------------------
+# SSEで流すJSONの定義
+# ------------------------------------------------------------------------
+    UploadProgressEvent:
       type: object
-      required:
-        - file_url
-        - file_type
       properties:
-        original_file_url: # 無加工のオリジナルファイルのurl
+        status:
           type: string
-          format: uri
-        file_type:
+          enum: [processing, completed, error]
+          description: 現在の状態
+        media_id:
           type: string
-          enum: [image, video] # gif,apngはimageとして扱う
-        thumbnail_image_url: # 画像のサムネイル
+          description: 完了時に付与されるファイルID
+        message:
           type: string
-          nullable: true
-          format: uri
-        encoded_image_url: # 圧縮済み画像(これを標準使用する)
-          type: string
-          nullable: true
-          format: uri
-        thumbnail_video_url: # 動画のサムネイル
-          type: string
-          nullable: true
-          format: uri
-        encoded_video_url: # 圧縮済み動画(これを標準使用する)
-          type: string
-          nullable: true
+          description: エラー時のメッセージ等
+      required:
+        - status
+# ------------------------------------------------------------------------
 # ------------------------------------------------------------------------
     ErrorResponse:
       type: object

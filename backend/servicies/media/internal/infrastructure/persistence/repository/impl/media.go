@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
+	"github.com/gummy_a/chirp/media/internal/domain/value_object"
 	"github.com/gummy_a/chirp/media/internal/infrastructure/persistence/db/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -42,7 +43,7 @@ func NewMediaRepository(logger slog.Logger, sql sqlc.Queries, s3 s3.Client, ctx 
 	}
 }
 
-func (m *MediaRepository) SaveMetaDataToDB(metadata entity.MetaData, job entity.EncodeJob) error {
+func (m *MediaRepository) SaveMetaDataToDB(metadata entity.MetaData, job entity.EncodeJob) (*value_object.MediaId, error) {
 	pgtypeUUID := pgtype.UUID{
 		Bytes: [16]byte(job.OwnerAccountId),
 		Valid: true,
@@ -51,10 +52,10 @@ func (m *MediaRepository) SaveMetaDataToDB(metadata entity.MetaData, job entity.
 	meta, err := json.Marshal(metadata)
 	if err != nil {
 		m.logger.Error("json.Unmarshal failed", slog.String("error", err.Error()))
-		return err
+		return nil, err
 	}
 
-	_, err = m.sql.InsertMedia(m.ctx, sqlc.InsertMediaParams{
+	ret, err := m.sql.InsertMedia(m.ctx, sqlc.InsertMediaParams{
 		OwnerAccountID:     pgtypeUUID,
 		MimeType:           string(job.UploadedFileInfo.MimeType),
 		OriginalFileName:   string(job.UploadedFileInfo.OriginalFileName),
@@ -63,12 +64,19 @@ func (m *MediaRepository) SaveMetaDataToDB(metadata entity.MetaData, job entity.
 	})
 	if err != nil {
 		m.logger.Error("InsertMedia failed", slog.String("error", err.Error()))
-		return err
+		return nil, err
 	}
-	return nil
+
+	mediaId := value_object.MediaId(ret.ID.Bytes)
+	return &mediaId, nil
 }
 
 func (m *MediaRepository) SaveFileToStorage(file entity.UploadedFileInfo) error {
+	env := os.Getenv("MEDIA_SERVICE_APP_ENV")
+	if env == "development" {
+		return nil
+	}
+
 	bucketName := os.Getenv("MEDIA_SERVICE_S3_BUCKET_NAME")
 	body, err := os.Open(string(file.OriginalFileName))
 	if err != nil {

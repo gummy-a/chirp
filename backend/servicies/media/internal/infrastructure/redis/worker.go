@@ -3,11 +3,27 @@ package redis
 import (
 	"encoding/json"
 	"log/slog"
+	"time"
 
 	"github.com/gummy_a/chirp/media/internal/domain/entity"
+	"github.com/gummy_a/chirp/media/internal/domain/value_object"
 )
 
-type Worker func(entity.EncodeJob) error
+type Worker func(entity.EncodeJob) (*value_object.MediaId, error)
+
+func (h *QueueHandler) publishStatus(status entity.JobStatus, jobId string) error {
+	msg, err := json.Marshal(status)
+	if err != nil {
+		return err
+	}
+
+	err = h.rdb.Publish(h.ctx, jobId, msg).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (h *QueueHandler) Worker(worker Worker) {
 	for {
@@ -24,12 +40,32 @@ func (h *QueueHandler) Worker(worker Worker) {
 			continue
 		}
 
-		err = worker(job)
+		var status entity.JobStatus
+		mediaId, err := worker(job)
+
 		if err != nil {
+			status.Status = value_object.STATUS_ERROR
+			*status.Message = "failed encoding"
 			h.logger.Error("worker failed", slog.String("error", err.Error()))
-			continue
 		} else {
-			h.logger.Info("worker success")
+			status.Status = value_object.STATUS_COMPLETED
+			status.MediaId = mediaId
+			*status.Message = "encode successed."
+
+			// set completed before publish to avoid race condition
+			err = h.rdb.Set(h.ctx, job.JobId.String(), mediaId.String(), 5*time.Minute).Err()
+			if err != nil {
+				h.logger.Error("Set failed", slog.String("error", err.Error()))
+				continue
+			}
 		}
+
+		err = h.publishStatus(status, job.JobId.String())
+		if err != nil {
+			h.logger.Error("publishStatus failed", slog.String("error", err.Error()))
+			continue
+		}
+
+		h.logger.Info("Publish success", slog.String("job_id", job.JobId.String()))
 	}
 }

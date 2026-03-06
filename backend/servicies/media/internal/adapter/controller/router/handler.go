@@ -30,3 +30,7 @@ func NewAppRouter(upload controller.UploadHandler, logger slog.Logger) http.Hand
 func (h *AppHandler) ApiMediaV1UploadPost(ctx context.Context, files []*os.File) (api.ImplResponse, error) {
 	return h.uploadHandler.Upload(ctx, files)
 }
+
+func (h *AppHandler) ApiMediaV1UploadEventsJobIdGet(ctx context.Context, jobId string) (api.ImplResponse, error) {
+	return h.uploadHandler.Events(ctx, jobId)
+}
