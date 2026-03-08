@@ -1,21 +1,16 @@
 "use client";
 
 import { SubmitEvent, useState } from "react";
-import { postApiAuthV1Login } from "@/lib/client/auth/v1/sdk.gen";
 import { useRouter } from "next/navigation";
 
 const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
 
-  const ret = await postApiAuthV1Login({
-    body: {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    },
-    throwOnError: false,
+  const ret = await fetch(`/api/auth/v1/login/`, {
+    method: "POST",
+    body: formData,
     credentials: "include",
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
   });
 
   return ret;
@@ -28,7 +23,7 @@ export const LoginForm = () => {
   const submitProcess = async (e: SubmitEvent<HTMLFormElement>) => {
     const ret = await onSubmit(e);
 
-    if (ret.response.ok) {
+    if (ret.ok) {
       router.push("/");
     } else {
       setMsg(<div className="text-red-500">Login failed!</div>);

@@ -1,20 +1,15 @@
 "use client";
 
 import { SubmitEvent, useRef, useState } from "react";
-import { postApiAuthV1TmpSignup } from "@/lib/client/auth/v1/sdk.gen";
 import { useRouter } from "next/navigation";
 
 const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
 
-  const ret = await postApiAuthV1TmpSignup({
-    body: {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    },
-    throwOnError: false,
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+  const ret = await fetch(`/api/auth/v1/signup/tmp/`, {
+    method: "POST",
+    body: formData,
   });
 
   return ret;
@@ -28,8 +23,9 @@ export const TemporarySignup = () => {
   const submitProcess = async (e: SubmitEvent<HTMLFormElement>) => {
     const ret = await onSubmit(e);
 
-    if (ret.response.ok) {
-      router.push(`/signup/?token=${ret.data?.signup_token}`);
+    if (ret.ok) {
+      const json = await ret.json();
+      router.push(`/signup/?token=${json.signup_token}`);
       ref.current?.reset();
     } else {
       setMsg(<div className="text-red-500">Signup failed!</div>);

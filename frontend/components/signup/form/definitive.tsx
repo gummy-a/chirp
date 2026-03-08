@@ -1,22 +1,17 @@
 "use client";
 
 import { SubmitEvent, useRef, useState } from "react";
-import { postApiAuthV1Signup } from "@/lib/client/auth/v1/sdk.gen";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
-const onSubmit = async (token: string, event: SubmitEvent<HTMLFormElement>) => {
+const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
 
-  const ret = await postApiAuthV1Signup({
-    body: {
-      signup_token: token,
-      number_code: parseInt(formData.get("number_code") as string),
-    },
-    throwOnError: false,
+  const ret = await fetch(`/api/auth/v1/signup/`, {
+    method: "POST",
+    body: formData,
     credentials: "include",
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
   });
 
   return ret;
@@ -30,9 +25,9 @@ export const Signup = () => {
   const token = param.get("token") || "";
 
   const submitProcess = async (e: SubmitEvent<HTMLFormElement>) => {
-    const ret = await onSubmit(token, e);
+    const ret = await onSubmit(e);
 
-    if (ret.response.ok) {
+    if (ret.ok) {
       router.push("/");
     } else {
       setMsg(<div className="text-red-500">Signup failed!</div>);
@@ -57,6 +52,7 @@ export const Signup = () => {
           required
         />
       </div>
+      <input type="hidden" name="signup_token" value={token} />
       <div className="mb-4">{msg}</div>
       <button
         className="w-full bg-blue-500 text-white p-2 rounded"

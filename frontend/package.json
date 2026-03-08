@@ -8,8 +8,7 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0",
     "lint": "eslint",
-    "fmt": "prettier --write app components lib",
-    "openapi": "openapi-ts"
+    "fmt": "prettier --write app components lib"
   },
   "dependencies": {
     "next": "16.1.6",
@@ -17,7 +16,6 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.92.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
