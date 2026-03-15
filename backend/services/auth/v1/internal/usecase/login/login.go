@@ -1,8 +1,8 @@
 package loginUsecase
 
 import (
+	"chirp/backend/services/auth/v1/internal/domain/repository"
 	"chirp/backend/services/auth/v1/internal/domain/value_object"
-	"chirp/backend/services/auth/v1/internal/usecase/repository"
 )
 
 type LoginAccountInput struct {

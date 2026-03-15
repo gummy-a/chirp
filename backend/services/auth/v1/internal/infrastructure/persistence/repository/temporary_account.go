@@ -48,9 +48,9 @@ func (r *TemporaryAccountRepository) Create(email value_object.Email, passwordHa
 	return &token, &accountID, nil
 }
 
-func (r *TemporaryAccountRepository) Delete(id value_object.TemporaryAccountID) error {
+func (r *TemporaryAccountRepository) Delete(id *value_object.TemporaryAccountID) error {
 	pgtypeUUID := pgtype.UUID{
-		Bytes: [16]byte(id),
+		Bytes: [16]byte(*id),
 		Valid: true,
 	}
 
@@ -62,9 +62,9 @@ func (r *TemporaryAccountRepository) Delete(id value_object.TemporaryAccountID) 
 	return nil
 }
 
-func (r *TemporaryAccountRepository) FindById(id value_object.TemporaryAccountID) (*entity.TemporaryAccount, error) {
+func (r *TemporaryAccountRepository) FindById(id *value_object.TemporaryAccountID) (*entity.TemporaryAccount, error) {
 	pgtypeUUID := pgtype.UUID{
-		Bytes: [16]byte(id),
+		Bytes: [16]byte(*id),
 		Valid: true,
 	}
 

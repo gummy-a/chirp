@@ -2,30 +2,26 @@ package external
 
 import (
 	"chirp/backend/router"
-	"chirp/backend/services/auth/v1/internal/adapter/controller"
-	"chirp/backend/services/auth/v1/internal/adapter/http"
+	authController "chirp/backend/services/auth/v1/internal/adapter/controller"
+	handler "chirp/backend/services/auth/v1/internal/adapter/http"
 	"chirp/backend/services/auth/v1/internal/infrastructure/email"
 	"chirp/backend/services/auth/v1/internal/infrastructure/persistence/db"
 	"chirp/backend/services/auth/v1/internal/infrastructure/persistence/db/sqlc"
 	"chirp/backend/services/auth/v1/internal/infrastructure/persistence/repository"
-	"chirp/backend/services/auth/v1/internal/usecase/login"
-	"chirp/backend/services/auth/v1/internal/usecase/signup"
+	loginUsecase "chirp/backend/services/auth/v1/internal/usecase/login"
+	signupUsecase "chirp/backend/services/auth/v1/internal/usecase/signup"
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"log/slog"
 	"os"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func checkEnvironmentVariables() {
 	env := os.Getenv("AUTH_SERVICE_APP_ENV")
 	if env == "" {
 		log.Fatal("AUTH_SERVICE_APP_ENV environment variable is not set")
-	}
-
-	port := os.Getenv("AUTH_SERVICE_PORT")
-	if env == "production" && port == "" {
-		log.Fatal("AUTH_SERVICE_PORT environment variable is required in production")
 	}
 
 	jwtSecretKey := os.Getenv("AUTH_SERVICE_JWT_SECRET_KEY")
@@ -38,9 +34,9 @@ func checkEnvironmentVariables() {
 		log.Fatal("AUTH_SERVICE_DATABASE_URL is not set")
 	}
 
-	region := os.Getenv("AUTH_SERVICE_AWS_REGION")
+	region := os.Getenv("AUTH_SERVICE_AWS_SES_REGION")
 	if env == "production" && region == "" {
-		log.Fatal("AUTH_SERVICE_AWS_REGION is not set")
+		log.Fatal("AUTH_SERVICE_AWS_SES_REGION is not set")
 	}
 
 	from := os.Getenv("AUTH_SERVICE_AWS_SES_FROM_ADDRESS")
@@ -59,7 +55,7 @@ type CreateAuthServiceResult struct {
 	Pool       *pgxpool.Pool
 }
 
-func CreateAuthService() *CreateAuthServiceResult {
+func CreateAuthService() (*CreateAuthServiceResult, error) {
 	checkEnvironmentVariables()
 	ctx := context.Background()
 
@@ -71,7 +67,7 @@ func CreateAuthService() *CreateAuthServiceResult {
 	// Infrastructure layer: create DB pool
 	pool, err := db.NewPool(ctx)
 	if err != nil {
-		log.Fatalf("Failed to create database pool: %v", err)
+		return nil, err
 	}
 
 	// Infrastructure layer: create SQLC sql
@@ -103,5 +99,5 @@ func CreateAuthService() *CreateAuthServiceResult {
 	return &CreateAuthServiceResult{
 		Controller: controller,
 		Pool:       pool,
-	}
+	}, nil
 }

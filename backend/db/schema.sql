@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict RkYaik88Z154zCqt45IQcYPOV70msYaOHhUIL3MhBpbNUCUJL8wpILqTbOrEAzO
+\restrict tka5xrmubKwhMBEoX1EerELypOB7O9rnCRsAyAm76O4g5QTpohO96EWwVjAs7nB
 
 -- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
 -- Dumped by pg_dump version 18.1 (Debian 18.1-1.pgdg13+2)
@@ -34,6 +34,21 @@ CREATE TABLE public.accounts (
     password_algorithm text NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: media; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.media (
+    id uuid DEFAULT uuidv7() NOT NULL,
+    owner_account_id uuid NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    mime_type text NOT NULL,
+    original_file_name text NOT NULL,
+    unprocessed_file_url text NOT NULL,
+    metadata jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 
@@ -78,6 +93,22 @@ ALTER TABLE ONLY public.accounts
 
 
 --
+-- Name: media media_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.media
+    ADD CONSTRAINT media_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: media media_unprocessed_file_url_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.media
+    ADD CONSTRAINT media_unprocessed_file_url_key UNIQUE (unprocessed_file_url);
+
+
+--
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -105,5 +136,5 @@ ALTER TABLE ONLY public.temporary_accounts
 -- PostgreSQL database dump complete
 --
 
-\unrestrict RkYaik88Z154zCqt45IQcYPOV70msYaOHhUIL3MhBpbNUCUJL8wpILqTbOrEAzO
+\unrestrict tka5xrmubKwhMBEoX1EerELypOB7O9rnCRsAyAm76O4g5QTpohO96EWwVjAs7nB
 

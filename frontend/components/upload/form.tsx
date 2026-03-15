@@ -2,6 +2,12 @@
 
 import "./button.css";
 import { SubmitEvent, useRef, useState } from "react";
+import { Progress } from "./progress";
+
+export type ApiResponse = {
+  original_file_name: string;
+  job_id: string;
+};
 
 const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
   event.preventDefault();
@@ -12,18 +18,21 @@ const onSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     body: formData,
   });
 
-  return await ret.json();
+  return ret;
 };
 
 export const UploadForm = () => {
   const ref = useRef<HTMLFormElement>(null);
   const [disabled, setDisabled] = useState(false);
+  const [json, setJson] = useState<ApiResponse[]>([]);
 
   const submit = async (e: SubmitEvent<HTMLFormElement>) => {
     setDisabled(true);
-    await onSubmit(e);
+    const ret = await onSubmit(e);
     setDisabled(false);
     ref.current?.reset();
+    const json = await ret.json();
+    setJson(json);
   };
 
   return (
@@ -36,10 +45,12 @@ export const UploadForm = () => {
         <input
           className="border rounded w-full p-2 cursor-pointer"
           type="file"
-          id="file"
-          name="file"
+          name="files"
           multiple
         />
+      </div>
+      <div className="mb-4">
+        <Progress json={json} />
       </div>
       <div>
         <button

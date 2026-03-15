@@ -14,11 +14,10 @@ import (
 
 func NewAwsConfig(ctx context.Context) (*aws.Config, error) {
 	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion(os.Getenv("AUTH_SERVICE_AWS_REGION")),
+		config.WithRegion(os.Getenv("AUTH_SERVICE_AWS_SES_REGION")),
 	)
 	if err != nil {
 		return nil, err
-
 	}
 	return &cfg, nil
 }
@@ -35,7 +34,7 @@ type EmailSender struct {
 	ctx context.Context
 }
 
-func (e *EmailSender) Send(to value_object.Email, numberCode value_object.NumberCode, tmpAccountID value_object.TemporaryAccountID) error {
+func (e *EmailSender) Send(to value_object.Email, numberCode value_object.NumberCode, tmpAccountID *value_object.TemporaryAccountID) error {
 	env := os.Getenv("AUTH_SERVICE_APP_ENV")
 	if env == "development" {
 		fmt.Printf("email: %s, numbercode: %d\n", to.String(), numberCode)

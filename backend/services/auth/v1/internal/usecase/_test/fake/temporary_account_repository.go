@@ -43,7 +43,7 @@ func (f *TemporaryAccountRepo) Create(
 }
 
 func (f *TemporaryAccountRepo) FindById(
-	id value_object.TemporaryAccountID,
+	id *value_object.TemporaryAccountID,
 ) (*entity.TemporaryAccount, error) {
 
 	acc, ok := f.Accounts[id.String()]
@@ -54,7 +54,7 @@ func (f *TemporaryAccountRepo) FindById(
 }
 
 func (f *TemporaryAccountRepo) Delete(
-	id value_object.TemporaryAccountID,
+	id *value_object.TemporaryAccountID,
 ) error {
 
 	delete(f.Accounts, id.String())

@@ -1,27 +1,27 @@
-import { postApiMediaV1Upload } from "@/lib/client/media/v1/sdk.gen";
-
 export async function POST(req: Request) {
   const formData = await req.formData();
-  const files = formData.getAll("file") as File[];
-  const authorizationHeader = req.headers.get("Authorization");
 
   try {
-    const ret = await postApiMediaV1Upload({
-      body: {
-        files: files,
-      },
-      headers: {
-        Authorization: authorizationHeader,
-      },
-      throwOnError: false,
-      baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    });
+    const headers = new Headers();
+    const auth = req.headers.get("authorization");
+    if (auth) {
+      headers.set("authorization", auth);
+    } else {
+      throw new Error("authorization header is required");
+    }
 
-    return new Response(JSON.stringify(ret.data), {
-      status: ret.response.ok ? 200 : 400,
-      headers: {
-        "Content-Type": "application/json",
+    const ret = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/media/v1/upload/`,
+      {
+        method: "POST",
+        body: formData,
+        headers: headers,
       },
+    );
+
+    return new Response(ret.body, {
+      status: ret.ok ? 200 : 400,
+      headers: ret.headers,
     });
   } catch (e) {
     console.error(e);

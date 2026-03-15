@@ -13,9 +13,9 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateJwt(accountID value_object.AccountID) (*string, error) {
+func GenerateJwt(accountID *value_object.AccountID) (*string, error) {
 	claims := Claims{
-		Id: accountID,
+		Id: *accountID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

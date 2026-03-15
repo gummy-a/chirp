@@ -34,7 +34,7 @@ func TestSignupAccount_Success(t *testing.T) {
 
 	uc := usecase.NewSignupAccountUseCase(accountRepo, tmpRepo)
 
-	token, err := uc.Execute(usecase.SignupAccountInput{
+	token, err := uc.Execute(&usecase.SignupAccountInput{
 		SignupToken: id,
 		NumberCode:  numberCode,
 	})
@@ -78,7 +78,7 @@ func TestSignupAccount_InvalidNumberCode(t *testing.T) {
 	uc := usecase.NewSignupAccountUseCase(accountRepo, tmpRepo)
 
 	badNumberCode := value_object.NumberCode(987654)
-	_, err = uc.Execute(usecase.SignupAccountInput{
+	_, err = uc.Execute(&usecase.SignupAccountInput{
 		SignupToken: id,
 		NumberCode:  badNumberCode,
 	})
@@ -117,7 +117,7 @@ func TestSignupAccount_ExpiredToken(t *testing.T) {
 
 	uc := usecase.NewSignupAccountUseCase(accountRepo, tmpRepo)
 
-	_, err = uc.Execute(usecase.SignupAccountInput{
+	_, err = uc.Execute(&usecase.SignupAccountInput{
 		SignupToken: id,
 		NumberCode:  numberCode,
 	})
@@ -152,7 +152,7 @@ func TestSignupAccount_DeletesTemporaryAccount(t *testing.T) {
 
 	uc := usecase.NewSignupAccountUseCase(accountRepo, tmpRepo)
 
-	_, err = uc.Execute(usecase.SignupAccountInput{
+	_, err = uc.Execute(&usecase.SignupAccountInput{
 		SignupToken: id,
 		NumberCode:  numberCode,
 	})

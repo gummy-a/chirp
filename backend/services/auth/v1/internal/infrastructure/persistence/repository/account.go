@@ -25,7 +25,7 @@ func NewAccountRepository(db *pgxpool.Pool, q *sqlc.Queries, logger *slog.Logger
 	return &AccountRepository{db: db, sql: q, logger: logger, ctx: ctx}
 }
 
-func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(tmpAccount entity.TemporaryAccount) (*value_object.JwtToken, error) {
+func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(tmpAccount *entity.TemporaryAccount) (*value_object.JwtToken, error) {
 	email := value_object.Email(tmpAccount.Email)
 	passwordHash := value_object.PasswordHash(tmpAccount.Password)
 	algorithm := value_object.NewPasswordAlgorithm()
@@ -71,7 +71,7 @@ func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(tmpAccount e
 
 	// generate JWT token for the new account
 	account_id := value_object.AccountID(createdAccount.ID.Bytes)
-	jwt, err := jwt.GenerateJwt(account_id)
+	jwt, err := jwt.GenerateJwt(&account_id)
 	if err != nil {
 		r.logger.Error("Failed to generate JWT", slog.String("account_id", account_id.String()), slog.String("error", err.Error()))
 		return nil, err
@@ -81,9 +81,9 @@ func (r *AccountRepository) CreateAccountThenDeleteTemporaryAccount(tmpAccount e
 	return &jwtToken, nil
 }
 
-func (r *AccountRepository) Delete(id value_object.AccountID) error {
+func (r *AccountRepository) Delete(id *value_object.AccountID) error {
 	pgtypeUUID := pgtype.UUID{
-		Bytes: [16]byte(id),
+		Bytes: [16]byte(*id),
 		Valid: true,
 	}
 
@@ -109,7 +109,7 @@ func (r *AccountRepository) FindByEmailAndPassword(email value_object.Email, pas
 	}
 
 	account_id := value_object.AccountID(account.ID.Bytes)
-	jwt, err := jwt.GenerateJwt(account_id)
+	jwt, err := jwt.GenerateJwt(&account_id)
 	if err != nil {
 		r.logger.Error("Failed to generate JWT", slog.String("account_id", account_id.String()), slog.String("error", err.Error()))
 		return nil, err

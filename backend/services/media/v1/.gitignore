@@ -1,0 +1,3 @@
+internal/infrastructure/persistence/db/sqlc/
+internal/infrastructure/grpc/pb/
+.env

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
+	"chirp/backend/services/auth/v1/internal/domain/repository"
 	"chirp/backend/services/auth/v1/internal/domain/value_object"
-	"chirp/backend/services/auth/v1/internal/usecase/repository"
 )
 
 type SignupAccountInput struct {
@@ -25,8 +25,8 @@ func NewSignupAccountUseCase(r repository.AccountRepository, tmp repository.Temp
 	}
 }
 
-func (u *SignupAccountUseCase) Execute(input SignupAccountInput) (*value_object.JwtToken, error) {
-	tempAccount, err := u.tmpAccount.FindById(input.SignupToken)
+func (u *SignupAccountUseCase) Execute(input *SignupAccountInput) (*value_object.JwtToken, error) {
+	tempAccount, err := u.tmpAccount.FindById(&input.SignupToken)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (u *SignupAccountUseCase) Execute(input SignupAccountInput) (*value_object.
 		return nil, errors.New("signup token has expired")
 	}
 
-	jwtToken, err := u.account.CreateAccountThenDeleteTemporaryAccount(*tempAccount)
+	jwtToken, err := u.account.CreateAccountThenDeleteTemporaryAccount(tempAccount)
 	if err != nil {
 		return nil, err
 	}

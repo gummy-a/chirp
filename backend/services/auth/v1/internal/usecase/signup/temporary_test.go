@@ -12,7 +12,7 @@ type fakeEmailSender struct {
 	err error
 }
 
-func (f *fakeEmailSender) Send(to value_object.Email, numberCode value_object.NumberCode, tmpAccountID value_object.TemporaryAccountID) error {
+func (f *fakeEmailSender) Send(to value_object.Email, numberCode value_object.NumberCode, tmpAccountID *value_object.TemporaryAccountID) error {
 	return f.err
 }
 
@@ -36,7 +36,7 @@ func TestSignupTemporaryAccount_Success(t *testing.T) {
 	}
 
 	// test Execute
-	id, err := uc.Execute(input)
+	id, err := uc.Execute(&input)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -69,7 +69,7 @@ func TestFindByIdTemporaryAccount_Success(t *testing.T) {
 		Password: password,
 	}
 
-	accountId, err := uc.Execute(input)
+	accountId, err := uc.Execute(&input)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -79,7 +79,7 @@ func TestFindByIdTemporaryAccount_Success(t *testing.T) {
 		t.Fatal("temporary account should not be found")
 	}
 
-	account, err := uc.FindById(*accountId)
+	account, err := uc.FindById(accountId)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -103,7 +103,7 @@ func TestFindByIdTemporaryAccount_FailureBeforeSignup(t *testing.T) {
 	var id value_object.TemporaryAccountID
 	id.ParseString("6991c26a-8414-8324-9935-5b15cadb1c94")
 
-	account, err := uc.FindById(id)
+	account, err := uc.FindById(&id)
 
 	if err == nil {
 		t.Fatal("temporary account should not be found")

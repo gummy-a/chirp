@@ -21,7 +21,7 @@ func (a *AuthController) GetTmpAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := a.UseCases.TmpSignup.FindById(accountId)
+	res, err := a.UseCases.TmpSignup.FindById(&accountId)
 	if err != nil {
 		a.Logger.Error("failed to find account", slog.String("error", err.Error()))
 		http.Error(w, "", http.StatusInternalServerError)

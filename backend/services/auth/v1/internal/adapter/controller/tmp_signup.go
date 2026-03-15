@@ -13,7 +13,7 @@ type PostTmpSignupResponse struct {
 }
 
 func (a *AuthController) PostTmpSignup(w http.ResponseWriter, r *http.Request) {
-	accountId, err := a.UseCases.TmpSignup.Execute(signupUsecase.SignupTemporaryAccountInput{
+	accountId, err := a.UseCases.TmpSignup.Execute(&signupUsecase.SignupTemporaryAccountInput{
 		Email:    value_object.Email(r.FormValue("email")),
 		Password: value_object.PasswordHash(r.FormValue("password")),
 	})

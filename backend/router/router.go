@@ -1,6 +1,10 @@
 package router
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+	"time"
+)
 
 type Handler struct {
 	Path    string
@@ -11,7 +15,15 @@ func NewAppRouter(handler []Handler) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	for _, h := range handler {
-		mux.HandleFunc(h.Path, h.Handler)
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			log.Printf("%s %s \n", r.Method, r.RequestURI)
+			s := time.Now()
+
+			h.Handler(w, r)
+
+			log.Printf("%s %s elapsed: %v\n", r.Method, r.RequestURI, time.Since(s))
+		}
+		mux.HandleFunc(h.Path, fn)
 	}
 
 	return mux

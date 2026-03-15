@@ -25,7 +25,7 @@ func (a *AuthController) PostSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwtToken, err := a.UseCases.Signup.Execute(signupUsecase.SignupAccountInput{
+	jwtToken, err := a.UseCases.Signup.Execute(&signupUsecase.SignupAccountInput{
 		SignupToken: token,
 		NumberCode:  value_object.NumberCode(numberCode),
 	})

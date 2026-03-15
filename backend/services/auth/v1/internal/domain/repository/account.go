@@ -6,7 +6,7 @@ import (
 )
 
 type AccountRepository interface {
-	CreateAccountThenDeleteTemporaryAccount(account entity.TemporaryAccount) (*value_object.JwtToken, error)
-	Delete(id value_object.AccountID) error
+	CreateAccountThenDeleteTemporaryAccount(account *entity.TemporaryAccount) (*value_object.JwtToken, error)
+	Delete(id *value_object.AccountID) error
 	FindByEmailAndPassword(email value_object.Email, password value_object.PasswordPlainText) (*value_object.JwtToken, error)
 }
