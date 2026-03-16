@@ -35,7 +35,3 @@ func (i MediaId) String() string {
 func NewUniqueJobId() JobId {
 	return JobId(uuid.New())
 }
-
-func NewStreamKey(ownerAccountId *OwnerAccountId) string {
-	return "stream:encode:" + ownerAccountId.String()
-}

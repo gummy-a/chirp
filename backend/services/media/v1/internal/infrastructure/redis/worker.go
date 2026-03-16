@@ -32,7 +32,7 @@ func (h *QueueHandler) Worker(worker func(*entity.EncodeJob) (*value_object.Medi
 			h.logger.Error("json.Unmarshal failed", slog.String("error", err.Error()))
 			continue
 		}
-		streamKey := value_object.NewStreamKey(&job.MediaInfo.OwnerAccountId)
+		streamKey := NewStreamKey(&job.MediaInfo.OwnerAccountId)
 
 		_, err = h.rdb.XAdd(h.ctx, &redis.XAddArgs{
 			Stream: streamKey,

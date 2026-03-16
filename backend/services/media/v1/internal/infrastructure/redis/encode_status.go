@@ -28,7 +28,7 @@ func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_obje
 
 		default:
 			streams, err := h.rdb.XRead(h.ctx, &redis.XReadArgs{
-				Streams: []string{value_object.NewStreamKey(ownerAccountId), lastId},
+				Streams: []string{NewStreamKey(ownerAccountId), lastId},
 				Block:   blockSecond * time.Second,
 			}).Result()
 

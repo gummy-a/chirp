@@ -7,10 +7,6 @@ import (
 	"chirp/backend/services/media/v1/internal/domain/entity"
 )
 
-const (
-	QueueName = "encode_queue"
-)
-
 func (h *QueueHandler) EnqueueJob(input *entity.EncodeJob) error {
 	json, err := json.Marshal(input)
 	if err != nil {
