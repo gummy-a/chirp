@@ -103,3 +103,7 @@ func (m *MediaRepository) SaveFileToStorage(path value_object.RealPath, url valu
 	m.logger.Info("saved \n", slog.String("path", string(path)), slog.String("url", string(url)))
 	return nil
 }
+
+func (m *MediaRepository) Delete(path value_object.RealPath) error {
+	return os.Remove(path.String())
+}

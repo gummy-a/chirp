@@ -8,4 +8,5 @@ import (
 type MediaRepository interface {
 	Save(media *entity.Media) (*value_object.MediaId, error)
 	SaveFileToStorage(path value_object.RealPath, url value_object.FileUrl) error
+	Delete(path value_object.RealPath) error
 }

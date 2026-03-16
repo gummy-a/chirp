@@ -21,7 +21,7 @@ func (f *queueUseCaseFake) EnqueueJob(input *entity.EncodeJob) error {
 
 func (f *queueUseCaseFake) Worker(func(*entity.EncodeJob) (*value_object.MediaId, error)) {}
 
-func (f *queueUseCaseFake) Status(reqCtx context.Context, jobId *value_object.JobId, response func(map[string]interface{})) error {
+func (f *queueUseCaseFake) Status(reqCtx context.Context, jobId *value_object.OwnerAccountId, response func(map[string]interface{})) error {
 	return nil
 }
 

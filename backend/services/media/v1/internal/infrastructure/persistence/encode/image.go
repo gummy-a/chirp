@@ -77,9 +77,8 @@ func (e *Encoder) encodeImage(job *entity.EncodeJob) (*value_object.MetaData, er
 				FileUrl:  value_object.FileUrl(file.CreateUniqueFileUrl()),
 				MimeType: "image/webp",
 			},
-			Width:       value_object.Width(*thumbnailWidth),
-			Height:      value_object.Height(*thumbnailHeight),
-			VideoLength: nil,
+			Width:  value_object.Width(*thumbnailWidth),
+			Height: value_object.Height(*thumbnailHeight),
 		},
 		Encoded: []value_object.Asset{
 			{
@@ -88,9 +87,8 @@ func (e *Encoder) encodeImage(job *entity.EncodeJob) (*value_object.MetaData, er
 					FileUrl:  value_object.FileUrl(file.CreateUniqueFileUrl()),
 					MimeType: value_object.MimeType(job.MediaInfo.UploadedFile.MimeType),
 				},
-				Width:       value_object.Width(*encodedWidth),
-				Height:      value_object.Height(*encodedHeight),
-				VideoLength: nil,
+				Width:  value_object.Width(*encodedWidth),
+				Height: value_object.Height(*encodedHeight),
 			},
 		},
 	}

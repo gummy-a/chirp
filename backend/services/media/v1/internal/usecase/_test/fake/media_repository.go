@@ -25,3 +25,7 @@ func (f *MediaRepository) SaveFileToStorage(fname value_object.RealPath, url val
 	f.SaveFileToStorageCalls = append(f.SaveFileToStorageCalls, *file)
 	return nil
 }
+
+func (f *MediaRepository) Delete(fname value_object.RealPath) error {
+	return nil
+}

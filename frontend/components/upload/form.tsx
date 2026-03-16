@@ -2,7 +2,7 @@
 
 import "./button.css";
 import { SubmitEvent, useRef, useState } from "react";
-import { Progress } from "./progress";
+import { SSEProgressMessage } from "./progress";
 
 export type ApiResponse = {
   original_file_name: string;
@@ -50,7 +50,7 @@ export const UploadForm = () => {
         />
       </div>
       <div className="mb-4">
-        <Progress json={json} />
+        <SSEProgressMessage json={json} />
       </div>
       <div>
         <button

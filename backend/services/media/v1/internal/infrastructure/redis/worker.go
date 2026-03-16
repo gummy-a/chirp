@@ -4,8 +4,16 @@ import (
 	"chirp/backend/services/media/v1/internal/domain/entity"
 	"chirp/backend/services/media/v1/internal/domain/value_object"
 	"encoding/json"
-	"github.com/redis/go-redis/v9"
+	"fmt"
 	"log/slog"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+)
+
+const (
+	MaxStreamLength    = 100
+	ExpireStreamMinute = 5
 )
 
 type Worker func(*entity.EncodeJob) (*value_object.MediaId, error)
@@ -24,12 +32,15 @@ func (h *QueueHandler) Worker(worker func(*entity.EncodeJob) (*value_object.Medi
 			h.logger.Error("json.Unmarshal failed", slog.String("error", err.Error()))
 			continue
 		}
+		streamKey := value_object.NewStreamKey(&job.MediaInfo.OwnerAccountId)
 
 		_, err = h.rdb.XAdd(h.ctx, &redis.XAddArgs{
-			Stream: job.JobId.String(),
+			Stream: streamKey,
+			MaxLen: MaxStreamLength,
+			Approx: true,
 			Values: map[string]interface{}{
-				"msg":                "start encoding",
-				"original_file_name": string(job.MediaInfo.UploadedFile.OriginalFileName),
+				"msg":    fmt.Sprintf("start encoding %s ...", string(job.MediaInfo.UploadedFile.OriginalFileName)),
+				"job_id": job.JobId.String(),
 			},
 		}).Result()
 		if err != nil {
@@ -37,26 +48,32 @@ func (h *QueueHandler) Worker(worker func(*entity.EncodeJob) (*value_object.Medi
 			continue
 		}
 
-		mediaId, err := worker(&job)
+		// set stream expire
+		_, err = h.rdb.Expire(h.ctx, streamKey, ExpireStreamMinute*time.Minute).Result()
+		if err != nil {
+			h.logger.Error("Expire failed", slog.String("error", err.Error()))
+			continue
+		}
 
+		mediaId, err := worker(&job)
 		if err != nil {
 			h.logger.Error("worker failed", slog.String("error", err.Error()))
 			continue
 		}
 
 		_, err = h.rdb.XAdd(h.ctx, &redis.XAddArgs{
-			Stream: job.JobId.String(),
+			Stream: streamKey,
+			MaxLen: MaxStreamLength,
+			Approx: true,
 			Values: map[string]interface{}{
-				"msg":                "encode finished",
-				"media_id":           mediaId.String(),
-				"original_file_name": string(job.MediaInfo.UploadedFile.OriginalFileName),
+				"msg":      fmt.Sprintf("encode %s finished.", string(job.MediaInfo.UploadedFile.OriginalFileName)),
+				"job_id":   job.JobId.String(),
+				"media_id": mediaId.String(),
 			},
 		}).Result()
 		if err != nil {
 			h.logger.Error("XAdd failed", slog.String("error", err.Error()))
 			continue
 		}
-
-		h.logger.Info("Encode job success", slog.String("job_id", job.JobId.String()))
 	}
 }

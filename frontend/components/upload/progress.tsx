@@ -1,64 +1,72 @@
 import { useEffect, useState } from "react";
 import { ApiResponse } from "./form";
 
-type encodeProcess = {
+type SSEResponse = {
   msg: string;
+  job_id: string;
   media_id: string | undefined;
-  original_file_name: string | undefined;
 };
 
 type Props = {
   json: ApiResponse[];
 };
 
-type Progress = {
-  message: string;
-  original_file_name: string;
+type ProgressMessage = {
+  msg: string;
+  job_id: string;
 };
 
-export const Progress = ({ json }: Props) => {
-  const [msg, setMsg] = useState<Progress[]>([]);
+export const SSEProgressMessage = ({ json }: Props) => {
+  const [msg, setMsg] = useState<ProgressMessage[]>([]);
 
   useEffect(() => {
     if (json.length === 0) {
       return;
     }
 
-    const sources: EventSource[] = [];
-    const progress: Progress[] = [];
+    const es = new EventSource(`/api/media/v1/status/`);
 
     for (const j of json) {
-      const es = new EventSource(`/api/media/v1/status/${j.job_id}/`);
-      sources.push(es);
-      progress.push({
-        message: `uploading ${j.original_file_name} ...`,
-        original_file_name: j.original_file_name,
-      });
-
-      es.onmessage = (e) => {
-        const data = JSON.parse(e.data) as encodeProcess;
-
-        setMsg((prev) =>
-          prev.map((e) => {
-            if (e.original_file_name === data.original_file_name) {
-              e.message = `upload finished ${data.original_file_name}.`;
-            }
-            return e;
-          }),
-        );
-      };
+      setMsg((prev) => [
+        ...prev,
+        {
+          msg: `uploading ${j.original_file_name} ...`,
+          job_id: j.job_id,
+        },
+      ]);
     }
-    setMsg(progress);
+
+    es.onerror = () => es.close();
+
+    es.onmessage = (e) => {
+      const data = JSON.parse(e.data) as SSEResponse;
+
+      setMsg((prev) =>
+        prev.map((v) => {
+          if (v.job_id === data.job_id) {
+            return {
+              ...v,
+              msg: data.msg,
+            };
+          }
+          return v;
+        }),
+      );
+
+      if (data.media_id !== undefined) {
+        es.close();
+      }
+    };
 
     return () => {
-      sources.forEach((s) => s.close());
+      es.close();
     };
   }, [json]);
 
   return (
     <>
       {msg.map((m) => (
-        <div key={m.original_file_name}>{m.message}</div>
+        <div key={m.job_id}>{m.msg}</div>
       ))}
     </>
   );

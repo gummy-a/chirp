@@ -28,6 +28,13 @@ func NewSaveStrategy(e *encode.Encoder, r MediaRepository) redis.Worker {
 			}
 		}
 
+		// save thmbnail
+		err = r.SaveFileToStorage(metadata.Thumbnail.EncodedFile.RealPath, metadata.Thumbnail.EncodedFile.FileUrl)
+		if err != nil {
+			return nil, err
+		}
+
+		// save data into db
 		media := entity.Media{
 			MediaInfo: job.MediaInfo,
 			Metadata:  *metadata,
@@ -36,6 +43,13 @@ func NewSaveStrategy(e *encode.Encoder, r MediaRepository) redis.Worker {
 		if err != nil {
 			return nil, err
 		}
+
+		// delete temporary files
+		r.Delete(job.MediaInfo.UploadedFile.RealPath)
+		for _, v := range metadata.Encoded {
+			r.Delete(v.EncodedFile.RealPath)
+		}
+		r.Delete(metadata.Thumbnail.EncodedFile.RealPath)
 
 		return mediaId, nil
 	}

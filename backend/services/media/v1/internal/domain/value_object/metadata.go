@@ -10,10 +10,9 @@ type MetaData struct {
 }
 
 type Asset struct {
-	EncodedFile EncodedFile  `json:"encoded_file"`
-	Width       Width        `json:"width"`
-	Height      Height       `json:"height"`
-	VideoLength *VideoLength `json:"video_length,omitempty"`
+	EncodedFile EncodedFile `json:"encoded_file"`
+	Width       Width       `json:"width"`
+	Height      Height      `json:"height"`
 }
 
 type EncodedFile struct {

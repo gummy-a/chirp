@@ -9,17 +9,27 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (h *QueueHandler) Status(reqCtx context.Context, jobId *value_object.JobId, response func(map[string]interface{})) error {
-	for {
+const (
+	blockSecond = 10
+)
+
+func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_object.OwnerAccountId, workerFunc func(map[string]interface{})) error {
+	// "$" marks events that are published only after the connection is established.
+	//
+	// NOTE:
+	// Encoding may start before the client connects to SSE, so some events may be lost.
+	lastId := "$"
+
+	// to avoid infinite loop, set retry limit
+	for range MaxStreamLength {
 		select {
 		case <-reqCtx.Done():
 			return nil
 
 		default:
-			lastId := "$"
 			streams, err := h.rdb.XRead(h.ctx, &redis.XReadArgs{
-				Streams: []string{jobId.String(), lastId},
-				Block:   30 * time.Second,
+				Streams: []string{value_object.NewStreamKey(ownerAccountId), lastId},
+				Block:   blockSecond * time.Second,
 			}).Result()
 
 			if err == redis.Nil {
@@ -33,10 +43,11 @@ func (h *QueueHandler) Status(reqCtx context.Context, jobId *value_object.JobId,
 
 			for _, s := range streams {
 				for _, msg := range s.Messages {
-					response(msg.Values)
+					workerFunc(msg.Values)
 					lastId = msg.ID
 				}
 			}
 		}
 	}
+	return nil
 }

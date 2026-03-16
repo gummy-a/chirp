@@ -28,7 +28,7 @@ func NewMediaHandler(uc *mediaController.MediaControllerUseCases, logger *slog.L
 	mediaController := []router.Handler{
 		{
 			// Upload is a handler for file upload. This saves files to /tmp and enqueue encode jobs.
-			// Input: files (binary) from multipart form values.
+			// Input: files (binary) from multipart form values, OwnerAccountId (uuid) from cookie.
 			// Success: 200 OK with JSON body {"original_file_name": "name", "job_id": "..."}
 			// Failure: 400 Bad Request for invalid input, 500 Internal Server Error for failed enqueue.
 			Path:    "POST /api/media/v1/upload/",
@@ -36,11 +36,11 @@ func NewMediaHandler(uc *mediaController.MediaControllerUseCases, logger *slog.L
 		},
 		{
 			// Status is a handler for file encoding job.
-			// this is SSE endpoint, connection is keep alived and responses encoding progress.
-			// Input: jobId (string) from path.
-			// Success: 200 OK with JSON body {"original_file_name": "name", "job_id": "..."}
+			// this is the SSE endpoint, connection is keep alived and responses encoding progress.
+			// Input: OwnerAccountId (uuid) from cookie.
+			// Success: 200 OK with event-stream body
 			// Failure: 400 Bad Request for invalid input, 500 Internal Server Error for failed encoding.
-			Path:    "GET /api/media/v1/upload/status/{jobId}/",
+			Path:    "GET /api/media/v1/upload/status/",
 			Handler: controller.Status,
 		},
 	}

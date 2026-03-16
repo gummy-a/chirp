@@ -17,11 +17,11 @@ func NewMediaEncodeStatusUseCase(q queue.QueueHandler) *MediaEncodeStatusUseCase
 }
 
 type MediaEncodeStatusInput struct {
-	ReqCtx     context.Context
-	JobId      *value_object.JobId
-	WorkerFunc func(map[string]interface{})
+	ReqCtx         context.Context
+	OwnerAccountId *value_object.OwnerAccountId
+	WorkerFunc     func(map[string]interface{})
 }
 
 func (u *MediaEncodeStatusUseCase) Execute(input *MediaEncodeStatusInput) error {
-	return u.queue.Status(input.ReqCtx, input.JobId, input.WorkerFunc)
+	return u.queue.Status(input.ReqCtx, input.OwnerAccountId, input.WorkerFunc)
 }

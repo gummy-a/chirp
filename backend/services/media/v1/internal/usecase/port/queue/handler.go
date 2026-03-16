@@ -9,5 +9,5 @@ import (
 type QueueHandler interface {
 	EnqueueJob(input *entity.EncodeJob) error
 	Worker(func(*entity.EncodeJob) (*value_object.MediaId, error))
-	Status(reqCtx context.Context, jobId *value_object.JobId, response func(map[string]interface{})) error
+	Status(reqCtx context.Context, ownerAccountId *value_object.OwnerAccountId, response func(map[string]interface{})) error
 }
