@@ -58,11 +58,11 @@ func (m *MediaRepository) Save(media *entity.Media) (*value_object.MediaId, erro
 	}
 
 	ret, err := m.sql.InsertMedia(m.ctx, sqlc.InsertMediaParams{
-		OwnerAccountID:     pgtypeUUID,
-		MimeType:           string(media.MediaInfo.UploadedFile.MimeType),
-		OriginalFileName:   string(media.MediaInfo.UploadedFile.OriginalFileName),
-		UnprocessedFileUrl: string(media.MediaInfo.UploadedFile.FileUrl),
-		Metadata:           meta,
+		OwnerAccountID:   pgtypeUUID,
+		MimeType:         string(media.MediaInfo.UploadedFile.MimeType),
+		OriginalFileName: string(media.MediaInfo.UploadedFile.OriginalFileName),
+		FileUrl:          string(media.MediaInfo.UploadedFile.FileUrl),
+		Metadata:         meta,
 	})
 	if err != nil {
 		m.logger.Error("InsertMedia failed", slog.String("error", err.Error()))

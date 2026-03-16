@@ -37,9 +37,9 @@ export const SSEProgressMessage = ({ json }: Props) => {
     }
 
     es.onerror = () => {
-      setMsg([{msg: "something went wrong.", job_id: ""}])
+      setMsg([{ msg: "something went wrong.", job_id: "" }]);
       es.close();
-    }
+    };
 
     es.onmessage = (e) => {
       const data = JSON.parse(e.data) as SSEResponse;

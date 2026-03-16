@@ -10,7 +10,7 @@ WHERE owner_account_id = $1
 LIMIT $2 OFFSET $3;
 
 -- name: InsertMedia :one
-INSERT INTO media (owner_account_id, mime_type, original_file_name, unprocessed_file_url, metadata)
+INSERT INTO media (owner_account_id, mime_type, original_file_name, file_url, metadata)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
