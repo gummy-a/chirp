@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	blockSecond = 10
+	blockSecond = 10 * time.Second
 )
 
 func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_object.OwnerAccountId, workerFunc func(map[string]interface{})) error {
@@ -29,7 +29,7 @@ func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_obje
 		default:
 			streams, err := h.rdb.XRead(h.ctx, &redis.XReadArgs{
 				Streams: []string{NewStreamKey(ownerAccountId), lastId},
-				Block:   blockSecond * time.Second,
+				Block:   blockSecond,
 			}).Result()
 
 			if err == redis.Nil {

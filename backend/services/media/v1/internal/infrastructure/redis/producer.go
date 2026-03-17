@@ -1,20 +1,19 @@
 package redis
 
 import (
+	"chirp/backend/services/media/v1/internal/domain/entity"
 	"encoding/json"
 	"log/slog"
-
-	"chirp/backend/services/media/v1/internal/domain/entity"
 )
 
 func (h *QueueHandler) EnqueueJob(input *entity.EncodeJob) error {
-	json, err := json.Marshal(input)
+	data, err := json.Marshal(input)
 	if err != nil {
 		h.logger.Error("json.Marshal failed", slog.String("error", err.Error()))
 		return err
 	}
 
-	err = h.rdb.RPush(h.ctx, QueueName, json).Err()
+	err = h.rdb.RPush(h.ctx, QueueName, data).Err()
 	if err != nil {
 		h.logger.Error("RPush failed", slog.String("error", err.Error()))
 		return err
