@@ -55,10 +55,6 @@ export const SSEProgressMessage = ({ json }: Props) => {
           return v;
         }),
       );
-
-      if (data.media_id !== undefined) {
-        es.close();
-      }
     };
 
     return () => {
