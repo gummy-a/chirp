@@ -9,10 +9,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const (
-	QueueName = "encode_queue"
-)
-
 type QueueHandler struct {
 	rdb    *redis.Client
 	ctx    context.Context
@@ -30,6 +26,6 @@ func NewQueueHandler(ctx context.Context, logger *slog.Logger) *QueueHandler {
 	}
 }
 
-func NewStreamKey(ownerAccountId *value_object.OwnerAccountId) string {
-	return "stream:encode:" + ownerAccountId.String()
+func NewSSEStreamKey(ownerAccountId *value_object.OwnerAccountId) string {
+	return "stream:encode:sse:" + ownerAccountId.String()
 }

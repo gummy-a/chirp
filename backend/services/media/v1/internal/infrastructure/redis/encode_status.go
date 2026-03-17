@@ -4,13 +4,8 @@ import (
 	"chirp/backend/services/media/v1/internal/domain/value_object"
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/redis/go-redis/v9"
-)
-
-const (
-	blockSecond = 10 * time.Second
 )
 
 func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_object.OwnerAccountId, workerFunc func(map[string]interface{})) error {
@@ -21,14 +16,14 @@ func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_obje
 	lastId := "$"
 
 	// to avoid infinite loop, set retry limit
-	for range MaxStreamLength {
+	for range maxStreamLength {
 		select {
 		case <-reqCtx.Done():
 			return nil
 
 		default:
 			streams, err := h.rdb.XRead(h.ctx, &redis.XReadArgs{
-				Streams: []string{NewStreamKey(ownerAccountId), lastId},
+				Streams: []string{NewSSEStreamKey(ownerAccountId), lastId},
 				Block:   blockSecond,
 			}).Result()
 

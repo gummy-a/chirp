@@ -4,6 +4,8 @@ import (
 	"chirp/backend/services/media/v1/internal/domain/entity"
 	"encoding/json"
 	"log/slog"
+
+	"github.com/redis/go-redis/v9"
 )
 
 func (h *QueueHandler) EnqueueJob(input *entity.EncodeJob) error {
@@ -13,9 +15,16 @@ func (h *QueueHandler) EnqueueJob(input *entity.EncodeJob) error {
 		return err
 	}
 
-	err = h.rdb.RPush(h.ctx, QueueName, data).Err()
+	err = h.rdb.XAdd(h.ctx, &redis.XAddArgs{
+		Stream: streamName,
+		MaxLen: maxStreamLength,
+		Approx: true,
+		Values: map[string]interface{}{
+			"payload": data,
+		},
+	}).Err()
 	if err != nil {
-		h.logger.Error("RPush failed", slog.String("error", err.Error()))
+		h.logger.Error("XAdd failed", slog.String("error", err.Error()))
 		return err
 	}
 
