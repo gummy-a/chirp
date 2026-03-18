@@ -8,20 +8,31 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+func (h *QueueHandler) deleteStream(streamName string) error {
+	if err := h.rdb.Del(h.ctx, streamName).Err(); err != nil {
+		h.logger.Error("Del failed", slog.String("error", err.Error()))
+		return err
+	}
+	return nil
+}
+
 func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_object.OwnerAccountId, workerFunc func(map[string]interface{})) error {
 	// NOTE:
 	// Encoding may start before the client connects to SSE, so some events may be lost.
 	lastId := "$"
 
-	// to avoid infinite loop, set retry limit
-	for range maxStreamLength {
+	streamName := NewSSEStreamName(ownerAccountId)
+	defer h.deleteStream(streamName)
+
+	for emptyCount := 0; emptyCount < 10; {
 		select {
 		case <-reqCtx.Done():
 			return nil
 
 		default:
+			emptyCount++
 			streams, err := h.rdb.XRead(h.ctx, &redis.XReadArgs{
-				Streams: []string{NewSSEStreamName(ownerAccountId), lastId},
+				Streams: []string{streamName, lastId},
 				Block:   blockSecond,
 			}).Result()
 
@@ -38,6 +49,7 @@ func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_obje
 				for _, msg := range s.Messages {
 					workerFunc(msg.Values)
 					lastId = msg.ID
+					emptyCount = 0
 				}
 			}
 		}

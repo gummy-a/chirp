@@ -37,7 +37,7 @@ export const SSEProgressMessage = ({ json }: Props) => {
     }
 
     es.onerror = () => {
-      setMsg([{ msg: "something went wrong.", job_id: "" }]);
+      setMsg((prev) => [...prev, { msg: "connection closed.", job_id: "" }]);
       es.close();
     };
 
