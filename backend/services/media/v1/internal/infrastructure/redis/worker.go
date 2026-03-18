@@ -14,27 +14,28 @@ import (
 )
 
 const (
-	maxStreamLength    = 100
-	expireStreamMinute = 5 * time.Minute
-	streamName         = "stream:encode:job"
-	blockSecond        = 10 * time.Second
+	maxEncodeStreamLength = 1000
+	maxSSEStreamLength    = 30
+	expireStreamMinute    = 5 * time.Minute
+	encodeStreamName      = "stream:encode:job"
+	blockSecond           = 10 * time.Second
 )
 
 type Worker func(*entity.EncodeJob) (*value_object.MediaId, error)
 
 func (h *QueueHandler) startProcess(result string) (*entity.EncodeJob, *string, error) {
 	var job entity.EncodeJob
-	err := json.Unmarshal([]byte(result), &job)
-	if err != nil {
+	if err := json.Unmarshal([]byte(result), &job); err != nil {
 		h.logger.Error("json.Unmarshal failed", slog.String("error", err.Error()))
 		return nil, nil, err
 	}
-	streamKey := NewSSEStreamKey(&job.MediaInfo.OwnerAccountId)
+
+	sseStreamName := NewSSEStreamName(&job.MediaInfo.OwnerAccountId)
 	pipe := h.rdb.Pipeline()
 
-	_, err = pipe.XAdd(h.ctx, &redis.XAddArgs{
-		Stream: streamKey,
-		MaxLen: maxStreamLength,
+	_, err := pipe.XAdd(h.ctx, &redis.XAddArgs{
+		Stream: sseStreamName,
+		MaxLen: maxSSEStreamLength,
 		Approx: true,
 		Values: map[string]interface{}{
 			"msg":    fmt.Sprintf("start encoding %s ...", string(job.MediaInfo.UploadedFile.OriginalFileName)),
@@ -46,7 +47,7 @@ func (h *QueueHandler) startProcess(result string) (*entity.EncodeJob, *string, 
 		return nil, nil, err
 	}
 
-	_, err = pipe.Expire(h.ctx, streamKey, expireStreamMinute).Result()
+	_, err = pipe.Expire(h.ctx, sseStreamName, expireStreamMinute).Result()
 	if err != nil {
 		h.logger.Error("Expire failed", slog.String("error", err.Error()))
 		return nil, nil, err
@@ -58,13 +59,13 @@ func (h *QueueHandler) startProcess(result string) (*entity.EncodeJob, *string, 
 		return nil, nil, err
 	}
 
-	return &job, &streamKey, nil
+	return &job, &sseStreamName, nil
 }
 
-func (h *QueueHandler) endProcess(streamKey *string, job *entity.EncodeJob, mediaId *value_object.MediaId) error {
+func (h *QueueHandler) endProcess(sseStreamName *string, job *entity.EncodeJob, mediaId *value_object.MediaId) error {
 	_, err := h.rdb.XAdd(h.ctx, &redis.XAddArgs{
-		Stream: *streamKey,
-		MaxLen: maxStreamLength,
+		Stream: *sseStreamName,
+		MaxLen: maxSSEStreamLength,
 		Approx: true,
 		Values: map[string]interface{}{
 			"msg":      fmt.Sprintf("encode %s finished.", string(job.MediaInfo.UploadedFile.OriginalFileName)),
@@ -88,7 +89,7 @@ func (h *QueueHandler) execWorkerFunc(res []redis.XStream, worker Worker, groupN
 				continue
 			}
 
-			job, streamKey, err := h.startProcess(result)
+			job, sseStreamName, err := h.startProcess(result)
 			if err != nil {
 				continue
 			}
@@ -98,13 +99,13 @@ func (h *QueueHandler) execWorkerFunc(res []redis.XStream, worker Worker, groupN
 				h.logger.Error("worker failed", slog.String("error", err.Error()))
 				continue
 			} else {
-				if err := h.rdb.XAck(h.ctx, streamName, groupName, msg.ID).Err(); err != nil {
+				if err := h.rdb.XAck(h.ctx, encodeStreamName, groupName, msg.ID).Err(); err != nil {
 					h.logger.Error("XAck failed", slog.String("error", err.Error()))
 					continue
 				}
 			}
 
-			if err := h.endProcess(streamKey, job, mediaId); err != nil {
+			if err := h.endProcess(sseStreamName, job, mediaId); err != nil {
 				continue
 			}
 		}
@@ -114,7 +115,7 @@ func (h *QueueHandler) execWorkerFunc(res []redis.XStream, worker Worker, groupN
 func (h *QueueHandler) Worker(worker func(*entity.EncodeJob) (*value_object.MediaId, error)) {
 	groupName := "group:worker"
 	consumerName := "consumer:worker:" + uuid.NewString()
-	err := h.rdb.XGroupCreateMkStream(h.ctx, streamName, groupName, "0").Err()
+	err := h.rdb.XGroupCreateMkStream(h.ctx, encodeStreamName, groupName, "0").Err()
 	if err != nil && !strings.Contains(err.Error(), "BUSYGROUP") {
 		h.logger.Error("XGroupCreateMkStream failed", slog.String("error", err.Error()))
 		return
@@ -124,7 +125,7 @@ func (h *QueueHandler) Worker(worker func(*entity.EncodeJob) (*value_object.Medi
 		res, err := h.rdb.XReadGroup(h.ctx, &redis.XReadGroupArgs{
 			Group:    groupName,
 			Consumer: consumerName,
-			Streams:  []string{streamName, ">"},
+			Streams:  []string{encodeStreamName, ">"},
 			Block:    blockSecond,
 			Count:    1,
 		}).Result()

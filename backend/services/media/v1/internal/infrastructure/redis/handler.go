@@ -26,6 +26,6 @@ func NewQueueHandler(ctx context.Context, logger *slog.Logger) *QueueHandler {
 	}
 }
 
-func NewSSEStreamKey(ownerAccountId *value_object.OwnerAccountId) string {
+func NewSSEStreamName(ownerAccountId *value_object.OwnerAccountId) string {
 	return "stream:encode:sse:" + ownerAccountId.String()
 }

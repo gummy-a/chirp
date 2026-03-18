@@ -22,7 +22,6 @@ func (f *MediaRepository) Save(media *entity.Media) (*value_object.MediaId, erro
 }
 
 func (f *MediaRepository) SaveFileToStorage(fname value_object.RealPath, url value_object.FileUrl) error {
-	f.SaveFileToStorageCalls = append(f.SaveFileToStorageCalls, *file)
 	return nil
 }
 

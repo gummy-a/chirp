@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"os"
 
@@ -76,7 +75,6 @@ func (m *MediaRepository) Save(media *entity.Media) (*value_object.MediaId, erro
 func (m *MediaRepository) SaveFileToStorage(path value_object.RealPath, url value_object.FileUrl) error {
 	env := os.Getenv("MEDIA_SERVICE_APP_ENV")
 	if env == "development" {
-		fmt.Printf("dev: saved %s to %s\n", path, url)
 		// skip uploading in dev env
 		return nil
 	}

@@ -14,12 +14,6 @@ INSERT INTO media (owner_account_id, mime_type, original_file_name, file_url, me
 VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
--- name: UpdateMedia :one
-UPDATE media
-SET metadata = $2
-WHERE id = $1
-RETURNING *;
-
 -- name: DeleteMedia :exec
 DELETE FROM media
 WHERE id = $1;

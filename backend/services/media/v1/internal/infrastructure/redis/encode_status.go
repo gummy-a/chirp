@@ -9,8 +9,6 @@ import (
 )
 
 func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_object.OwnerAccountId, workerFunc func(map[string]interface{})) error {
-	// "$" marks events that are published only after the connection is established.
-	//
 	// NOTE:
 	// Encoding may start before the client connects to SSE, so some events may be lost.
 	lastId := "$"
@@ -23,7 +21,7 @@ func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_obje
 
 		default:
 			streams, err := h.rdb.XRead(h.ctx, &redis.XReadArgs{
-				Streams: []string{NewSSEStreamKey(ownerAccountId), lastId},
+				Streams: []string{NewSSEStreamName(ownerAccountId), lastId},
 				Block:   blockSecond,
 			}).Result()
 

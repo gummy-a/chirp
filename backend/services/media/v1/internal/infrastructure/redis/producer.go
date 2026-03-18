@@ -16,8 +16,8 @@ func (h *QueueHandler) EnqueueJob(input *entity.EncodeJob) error {
 	}
 
 	err = h.rdb.XAdd(h.ctx, &redis.XAddArgs{
-		Stream: streamName,
-		MaxLen: maxStreamLength,
+		Stream: encodeStreamName,
+		MaxLen: maxEncodeStreamLength,
 		Approx: true,
 		Values: map[string]interface{}{
 			"payload": data,
