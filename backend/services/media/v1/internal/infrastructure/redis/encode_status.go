@@ -4,8 +4,13 @@ import (
 	"chirp/backend/services/media/v1/internal/domain/value_object"
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/redis/go-redis/v9"
+)
+
+const (
+	sseBlockSecond = 1 * time.Second
 )
 
 func (h *QueueHandler) deleteStream(streamName string) error {
@@ -24,16 +29,16 @@ func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_obje
 	streamName := NewSSEStreamName(ownerAccountId)
 	defer h.deleteStream(streamName)
 
-	for emptyCount := 0; emptyCount < 10; {
+	for retryCount := 0; retryCount < 30; {
 		select {
 		case <-reqCtx.Done():
 			return nil
 
 		default:
-			emptyCount++
+			retryCount++
 			streams, err := h.rdb.XRead(h.ctx, &redis.XReadArgs{
 				Streams: []string{streamName, lastId},
-				Block:   blockSecond,
+				Block:   sseBlockSecond,
 			}).Result()
 
 			if err == redis.Nil {
@@ -49,7 +54,7 @@ func (h *QueueHandler) Status(reqCtx context.Context, ownerAccountId *value_obje
 				for _, msg := range s.Messages {
 					workerFunc(msg.Values)
 					lastId = msg.ID
-					emptyCount = 0
+					retryCount = 0
 				}
 			}
 		}

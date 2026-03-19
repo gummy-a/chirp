@@ -18,7 +18,7 @@ const (
 	maxSSEStreamLength    = 30
 	expireStreamMinute    = 5 * time.Minute
 	encodeStreamName      = "stream:encode:job"
-	blockSecond           = 10 * time.Second
+	encoderBlockSecond    = 10 * time.Second
 )
 
 type Worker func(*entity.EncodeJob) (*value_object.MediaId, error)
@@ -126,7 +126,7 @@ func (h *QueueHandler) Worker(worker func(*entity.EncodeJob) (*value_object.Medi
 			Group:    groupName,
 			Consumer: consumerName,
 			Streams:  []string{encodeStreamName, ">"},
-			Block:    blockSecond,
+			Block:    encoderBlockSecond,
 			Count:    1,
 		}).Result()
 
