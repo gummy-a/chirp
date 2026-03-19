@@ -16,16 +16,18 @@ type ProgressMessage = {
   job_id: string;
 };
 
+const sseCloseConnectionMessage = "--- end SSE connection---";
+
 export const SSEProgressMessage = ({ json }: Props) => {
   const [msg, setMsg] = useState<ProgressMessage[]>([]);
+  let finishedCount = 0;
 
   useEffect(() => {
     if (json.length === 0) {
       return;
     }
 
-    const es = new EventSource(`/api/media/v1/status/`);
-
+    // create job message list
     for (const j of json) {
       setMsg((prev) => [
         ...prev,
@@ -36,25 +38,44 @@ export const SSEProgressMessage = ({ json }: Props) => {
       ]);
     }
 
+    const es = new EventSource(`/api/media/v1/status/`);
+
     es.onerror = () => {
-      setMsg((prev) => [...prev, { msg: "connection closed.", job_id: "" }]);
+      setMsg((prev) => [
+        ...prev,
+        { msg: "unexpected error occured.", job_id: "error" },
+      ]);
       es.close();
     };
 
     es.onmessage = (e) => {
       const data = JSON.parse(e.data) as SSEResponse;
 
-      setMsg((prev) =>
-        prev.map((v) => {
-          if (v.job_id === data.job_id) {
-            return {
-              ...v,
-              msg: data.msg,
-            };
-          }
-          return v;
-        }),
-      );
+      // each jobs will send a close connection message
+      if (data.msg === sseCloseConnectionMessage) {
+        finishedCount++;
+        if (finishedCount === json.length) {
+          setMsg((prev) => [
+            ...prev,
+            { msg: "connection closed.", job_id: "finished" },
+          ]);
+          es.close();
+        }
+        return;
+      } else {
+        // update job message
+        setMsg((prev) =>
+          prev.map((v) => {
+            if (v.job_id === data.job_id) {
+              return {
+                ...v,
+                msg: data.msg,
+              };
+            }
+            return v;
+          }),
+        );
+      }
     };
 
     return () => {

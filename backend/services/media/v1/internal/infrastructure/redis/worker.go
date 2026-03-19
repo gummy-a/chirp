@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	maxEncodeStreamLength = 1000
-	maxSSEStreamLength    = 30
-	expireStreamMinute    = 5 * time.Minute
-	encodeStreamName      = "stream:encode:job"
-	encoderBlockSecond    = 10 * time.Second
+	maxEncodeStreamLength     = 1000
+	maxSSEStreamLength        = 30
+	expireStreamMinute        = 5 * time.Minute
+	encodeStreamName          = "stream:encode:job"
+	encoderBlockSecond        = 10 * time.Second
+	sseCloseConnectionMessage = "--- end SSE connection---"
 )
 
 type Worker func(*entity.EncodeJob) (*value_object.MediaId, error)
@@ -71,6 +72,20 @@ func (h *QueueHandler) endProcess(sseStreamName *string, job *entity.EncodeJob, 
 			"msg":      fmt.Sprintf("encode %s finished.", string(job.MediaInfo.UploadedFile.OriginalFileName)),
 			"job_id":   job.JobId.String(),
 			"media_id": mediaId.String(),
+		},
+	}).Result()
+	if err != nil {
+		h.logger.Error("XAdd failed", slog.String("error", err.Error()))
+		return err
+	}
+
+	_, err = h.rdb.XAdd(h.ctx, &redis.XAddArgs{
+		Stream: *sseStreamName,
+		MaxLen: maxSSEStreamLength,
+		Approx: true,
+		Values: map[string]interface{}{
+			"msg":    sseCloseConnectionMessage,
+			"job_id": job.JobId.String(),
 		},
 	}).Result()
 	if err != nil {
