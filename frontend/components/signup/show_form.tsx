@@ -3,7 +3,6 @@
 import { TemporarySignup } from "./form/temporary";
 import { Signup } from "./form/definitive";
 import { useEffect, useState } from "react";
-import { getApiAuthV1TmpAccountById } from "@/lib/client/auth/v1/sdk.gen";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export const ShowSignupForm = () => {
@@ -15,18 +14,14 @@ export const ShowSignupForm = () => {
   useEffect(() => {
     (async () => {
       try {
-        if (localStorage.getItem("jwt_token")) {
-          router.push("/");
-        }
-
-        const ret = await getApiAuthV1TmpAccountById({
-          path: {
-            id: token,
+        const ret = await fetch(`/api/auth/v1/account/tmp/${token}/`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
           },
-          throwOnError: false,
         });
 
-        if (ret.response.ok && token) {
+        if (ret.ok && token) {
           setElement(<Signup />);
         } else {
           setElement(<TemporarySignup />);

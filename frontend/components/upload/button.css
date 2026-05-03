@@ -1,0 +1,8 @@
+/* write CSS directly since file-selector-button cannot apply tailwind css  */
+input[type="file"]::file-selector-button,
+input[type="file"]::-webkit-file-upload-button {
+  background-color: rgb(209, 213, 219);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+}

@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "prebuild": "npm run fmt && npm run lint",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0",
     "lint": "eslint",
-    "fmt": "prettier --write app components",
-    "openapi": "openapi-ts"
+    "fmt": "prettier --write app components lib"
   },
   "dependencies": {
     "next": "16.1.6",
@@ -17,7 +16,6 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.92.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
